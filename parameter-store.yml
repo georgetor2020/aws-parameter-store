@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Adds a parameter to parameter store
+Parameters:
+  Key:
+    Type: String
+    Description: The key for our parameter
+    Default: /cdd/MyDB
+  DevCreds:
+    Type: String
+    Description: Dev DB credentials
+    Default: '{"Login": "admin", "Password": "badpass123"}'
+  DevPass:
+    Type: String
+    Default: "badpass123"
+  ProdCreds:
+    Type: String
+    Description: Prod DB credentials
+    Default: '{"Login": "admin", "Password": "badpass"}'
+  MkDB:
+    Type: String
+    Default: "True"
+  VPC:
+    Type: String
+    Default: vpc-0e77ef725616198b6
+  CIDR1:
+    Type: String
+    Default: "10.2.202.0/24"
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  CIDR2:
+    Type: String
+    Default: "10.2.203.0/24"
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  CIDR3:
+    Type: String
+    Default: "10.2.204.0/24"
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+    
+Conditions:
+    MakeDB: 
+        !Equals [!Ref MkDB, "True"]
+
+    
+Resources:
+    DevParam:
+        Type: AWS::SSM::Parameter
+        Condition: MakeDB
+        Properties:
+          Name: !Join [ '/', [!Ref Key,"DEV","credentials"] ]
+          Description: 'Sample dev config values for my app'
+          Type: String
+          Value: !Ref DevCreds
+          Tags: {
+            "Environment": "DEV"
+          }
+    ProdParam:
+        Type: AWS::SSM::Parameter
+        Properties:
+          Name: !Join [ '/', [!Ref Key,"PROD","credentials"] ]
+          Description: 'Sample dev config values for my app'
+          Type: String
+          Value: !Ref ProdCreds
+          Tags: {
+            "Environment": "PROD"
+          }
+    DevDB:
+        Type: AWS::RDS::DBInstance
+        Condition: MakeDB
+        Properties:
+            AllocatedStorage: "10"
+            DBInstanceClass: db.t3.small
+            DBInstanceIdentifier: !Join ['-',["DevDB",!Ref "AWS::StackName"]]
+            DBName: "DevDB"
+            DBSubnetGroupName: !Ref DBSubnetGroup
+            DeleteAutomatedBackups: True
+            Engine: mysql
+            MasterUsername: "admin"
+            MasterUserPassword: !Ref DevPass
+            PubliclyAccessible: False
+            StorageEncrypted: True
+            StorageType: "gp2"
+            
+            
+    DBSubnetGroup:
+        Type: AWS::RDS::DBSubnetGroup
+        Properties:
+            DBSubnetGroupDescription: "MySQL DB Subnet"
+            DBSubnetGroupName: !Join [ '-',["myDBSubnet",!Ref "AWS::StackName"]]
+            SubnetIds: 
+            - !Ref DBSubnet01
+            - !Ref DBSubnet02
+            - !Ref DBSubnet03
+            
+    DBSubnet01:
+        Type: AWS::EC2::Subnet
+        Properties:
+            AvailabilityZone: "us-east-2a"
+            CidrBlock: !Ref CIDR1
+            VpcId: !Ref VPC
+            Tags:
+            - Key: Name
+              Value: !Join [ '-' , [ "db2a",!Ref "AWS::StackName" ] ]            
+    DBSubnet02:
+        Type: AWS::EC2::Subnet
+        Properties:
+            AvailabilityZone: "us-east-2b"
+            CidrBlock: !Ref CIDR2
+            VpcId: !Ref VPC
+            Tags:
+            - Key: Name
+              Value: !Join [ '-' , [ "db2b",!Ref "AWS::StackName" ] ]
+            
+    DBSubnet03:
+        Type: AWS::EC2::Subnet
+        Properties:
+            AvailabilityZone: "us-east-2c"
+            CidrBlock: !Ref CIDR3
+            VpcId: !Ref VPC
+            Tags:
+            - Key: Name
+              Value: !Join [ '-' , [ "db2c",!Ref "AWS::StackName" ] ]                
