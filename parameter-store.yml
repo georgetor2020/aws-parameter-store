@@ -1,24 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Adds a parameter to parameter store
 Parameters:
-  Key:
-    Type: String
-    Description: The key for our parameter
-    Default: /cdd/MyDB
-  DevCreds:
-    Type: String
-    Description: Dev DB credentials
-    Default: '{"Login": "admin", "Password": "badpass123"}'
+
   DevPass:
-    Type: String
-    Default: "badpass123"
-  ProdCreds:
-    Type: String
-    Description: Prod DB credentials
-    Default: '{"Login": "admin", "Password": "badpass"}'
-  MkDB:
-    Type: String
-    Default: "True"
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /mydb/Dev/Password
+    NoEcho: True
+  DevLogin:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /mydb/Dev/Login
+
   VPC:
     Type: String
     Default: vpc-0e77ef725616198b6
@@ -35,56 +26,33 @@ Parameters:
     Default: "10.2.204.0/24"
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
     
-Conditions:
-    MakeDB: 
-        !Equals [!Ref MkDB, "True"]
-
-    
+   
 Resources:
-    DevParam:
-        Type: AWS::SSM::Parameter
-        Condition: MakeDB
-        Properties:
-          Name: !Join [ '/', [!Ref Key,"DEV","credentials"] ]
-          Description: 'Sample dev config values for my app'
-          Type: String
-          Value: !Ref DevCreds
-          Tags: {
-            "Environment": "DEV"
-          }
-    ProdParam:
-        Type: AWS::SSM::Parameter
-        Properties:
-          Name: !Join [ '/', [!Ref Key,"PROD","credentials"] ]
-          Description: 'Sample dev config values for my app'
-          Type: String
-          Value: !Ref ProdCreds
-          Tags: {
-            "Environment": "PROD"
-          }
+          
     DevDB:
-        Type: AWS::RDS::DBInstance
-        Condition: MakeDB
+        Type: AWS::RDS::DBCluster
         Properties:
-            AllocatedStorage: "10"
-            DBInstanceClass: db.t3.small
-            DBInstanceIdentifier: !Join ['-',["DevDB",!Ref "AWS::StackName"]]
-            DBName: "DevDB"
-            DBSubnetGroupName: !Ref DBSubnetGroup
-            DeleteAutomatedBackups: True
-            Engine: mysql
-            MasterUsername: "admin"
+            Engine: aurora
+            EngineMode: serverless
+            DatabaseName: "DevDB"
+            MasterUsername: !Ref DevLogin
             MasterUserPassword: !Ref DevPass
-            PubliclyAccessible: False
-            StorageEncrypted: True
-            StorageType: "gp2"
-            
-            
+            DBClusterIdentifier: !Join [ "-", ["DevDBCluster",!Ref "AWS::StackName"]]
+            DBSubnetGroupName: !Ref DBSubnetGroup
+            BackupRetentionPeriod: 1
+            DeletionProtection: false
+            StorageEncrypted: true
+            Tags:
+            - Key: CostCenter
+              Value: "1520"
+#        VpcSecurityGroupIds:
+#            - !Ref VpcSecurityGroupId
+        
     DBSubnetGroup:
         Type: AWS::RDS::DBSubnetGroup
         Properties:
             DBSubnetGroupDescription: "MySQL DB Subnet"
-            DBSubnetGroupName: !Join [ '-',["myDBSubnet",!Ref "AWS::StackName"]]
+            DBSubnetGroupName: !Join [ '-',["mydbsubnet",!Ref "AWS::StackName"]]
             SubnetIds: 
             - !Ref DBSubnet01
             - !Ref DBSubnet02
