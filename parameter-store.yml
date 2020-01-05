@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Adds a parameter to parameter store
+Description: Creates a serverless Aurora database, with login information sourced from parameter store
 Parameters:
 
   DevPass:
@@ -10,27 +10,83 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /mydb/Dev/Login
 
-  VPC:
-    Type: String
-    Default: vpc-0e77ef725616198b6
-  CIDR1:
+  DBCIDR1:
     Type: String
     Default: "10.2.202.0/24"
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
-  CIDR2:
+  DBCIDR2:
     Type: String
     Default: "10.2.203.0/24"
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
-  CIDR3:
+  DBCIDR3:
     Type: String
     Default: "10.2.204.0/24"
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+
+
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+
+  VpcCIDR:
+    Description: Please enter the IP range (CIDR notation) for this VPC
+    Type: String
+    Default: 10.192.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+
+
+  PublicSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
+    Type: String
+    Default: 10.192.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+
+  PublicSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.11.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+
+  PrivateSubnet1CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
+    Type: String
+    Default: 10.192.20.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+
+  PrivateSubnet2CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
+    Type: String
+    Default: 10.192.21.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  
+  MakeDB:
+    Type: String
+    Description: Set to True if you want to create an Aurora MySQL serverless database cluster
+    Default: False
     
-   
+  MakePrivateSubnets:
+    Type: String
+    Description: To skip building private subnets and their associated gateways, set False
+    Default: False
+  
+  IngressIPforSSH:
+    Type: String
+    Description: Which IP Address to allow SSH access
+    Default: "97.91.155.94/32"
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+
+    
+Conditions:
+  MakeDatabase:
+    !Equals [ !Ref MakeDB, "True"]
+  MakePrivate:    
+    !Equals [ !Ref MakePrivateSubnets, "True"]
+
 Resources:
           
     DevDB:
         Type: AWS::RDS::DBCluster
+        Condition: MakeDatabase
         Properties:
             Engine: aurora
             EngineMode: serverless
@@ -42,17 +98,90 @@ Resources:
             BackupRetentionPeriod: 1
             DeletionProtection: false
             StorageEncrypted: true
+            ScalingConfiguration:
+                AutoPause: true
+                MaxCapacity: 16
+                MinCapacity: 1
+                SecondsUntilAutoPause: 1200
+
             Tags:
-            - Key: CostCenter
-              Value: "1520"
-#        VpcSecurityGroupIds:
-#            - !Ref VpcSecurityGroupId
-        
+                - Key: CostCenter
+                  Value: "1520"
+            VpcSecurityGroupIds:
+                - !Ref DBSecurityGroup
+
+    DBSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: !Join [ "-", [ "db-sg", !Ref EnvironmentName] ]
+            GroupDescription: "database security group"
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName] ]
+           
+    ClientSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: !Join [ "-", [ "client-sg", !Ref EnvironmentName] ]
+            GroupDescription: "client security group"
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Join [ "-", [ "client-sg", !Ref EnvironmentName] ]
+
+                
+    InboundSSH:
+        Type: AWS::EC2::SecurityGroupIngress
+        Properties:
+            IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            GroupId: !Ref ClientSecurityGroup
+            CidrIp: !Ref IngressIPforSSH
+
+# Allow inbound MySQL Requests                
+    # InboundMySQL:
+        # Type: AWS::EC2::SecurityGroupIngress
+        # Properties:
+            # IpProtocol: tcp
+            # FromPort: 3306
+            # ToPort: 3306
+            # SourceSecurityGroupId: !Ref ClientSecurityGroup
+            # GroupId: !Ref DBSecurityGroup
+
+# Allow inbound MySQL Requests                
+    InboundMySQL:
+        Type: AWS::EC2::SecurityGroupIngress
+        Properties:
+            IpProtocol: tcp
+            FromPort: 3306
+            ToPort: 3306
+            SourceSecurityGroupId: !Ref DBSecurityGroup
+            GroupId: !Ref DBSecurityGroup            
+           
+            
+    Cloud9:
+        Type: AWS::Cloud9::EnvironmentEC2
+        Properties: 
+            AutomaticStopTimeMinutes: 30
+            Description: Client environment for lab
+            InstanceType: t2.micro
+            Name: Cloud9
+#            OwnerArn: String
+#            Repositories: 
+#                - RepositoryUrl: !Sub 'https://git-codecommit.${AWS::Region}.amazonaws.com/v1/repos/${RepositoryName}'
+#                  PathComponent: !Sub 'codecommit/${RepositoryName}'
+            SubnetId: !Ref PublicSubnet1
+
+
+
+            
     DBSubnetGroup:
         Type: AWS::RDS::DBSubnetGroup
         Properties:
             DBSubnetGroupDescription: "MySQL DB Subnet"
-            DBSubnetGroupName: !Join [ '-',["mydbsubnet",!Ref "AWS::StackName"]]
+            DBSubnetGroupName: !Join [ '-',[!Ref EnvironmentName,"mydbsubnet",!Ref "AWS::StackName"]]
             SubnetIds: 
             - !Ref DBSubnet01
             - !Ref DBSubnet02
@@ -62,27 +191,223 @@ Resources:
         Type: AWS::EC2::Subnet
         Properties:
             AvailabilityZone: "us-east-2a"
-            CidrBlock: !Ref CIDR1
+            CidrBlock: !Ref DBCIDR1
             VpcId: !Ref VPC
             Tags:
             - Key: Name
-              Value: !Join [ '-' , [ "db2a",!Ref "AWS::StackName" ] ]            
+              Value: !Join [ '-' , [ !Ref EnvironmentName,"db2a",!Ref "AWS::StackName" ] ]            
     DBSubnet02:
         Type: AWS::EC2::Subnet
         Properties:
             AvailabilityZone: "us-east-2b"
-            CidrBlock: !Ref CIDR2
+            CidrBlock: !Ref DBCIDR2
             VpcId: !Ref VPC
             Tags:
             - Key: Name
-              Value: !Join [ '-' , [ "db2b",!Ref "AWS::StackName" ] ]
-            
+              Value: !Join [ '-' , [ !Ref EnvironmentName,"db2b",!Ref "AWS::StackName" ] ]            
     DBSubnet03:
         Type: AWS::EC2::Subnet
         Properties:
             AvailabilityZone: "us-east-2c"
-            CidrBlock: !Ref CIDR3
+            CidrBlock: !Ref DBCIDR3
             VpcId: !Ref VPC
             Tags:
             - Key: Name
-              Value: !Join [ '-' , [ "db2c",!Ref "AWS::StackName" ] ]                
+              Value: !Join [ '-' , [ !Ref EnvironmentName,"db2c",!Ref "AWS::StackName" ] ]
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: !Ref VpcCIDR
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: !Ref EnvironmentName
+
+    InternetGateway:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: !Ref EnvironmentName
+
+    InternetGatewayAttachment:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            InternetGatewayId: !Ref InternetGateway
+            VpcId: !Ref VPC
+
+    PublicSubnet1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 0, !GetAZs '' ]
+            CidrBlock: !Ref PublicSubnet1CIDR
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+
+    PublicSubnet2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+            CidrBlock: !Ref PublicSubnet2CIDR
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+
+    PrivateSubnet1:
+        Type: AWS::EC2::Subnet
+        Condition: MakePrivate
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+            CidrBlock: !Ref PrivateSubnet1CIDR
+            MapPublicIpOnLaunch: false
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
+
+    PrivateSubnet2:
+        Type: AWS::EC2::Subnet
+        Condition: MakePrivate
+        Properties:
+            VpcId: !Ref VPC
+            AvailabilityZone: !Select [ 1, !GetAZs  '' ]
+            CidrBlock: !Ref PrivateSubnet2CIDR
+            MapPublicIpOnLaunch: false
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
+
+    NatGateway1EIP:
+        Type: AWS::EC2::EIP
+        DependsOn: InternetGatewayAttachment
+        Condition: MakePrivate
+        Properties:
+            Domain: vpc
+
+    NatGateway2EIP:
+        Type: AWS::EC2::EIP
+        DependsOn: InternetGatewayAttachment
+        Condition: MakePrivate
+        Properties:
+            Domain: vpc
+
+    NatGateway1:
+        Type: AWS::EC2::NatGateway
+        Condition: MakePrivate
+        Properties:
+            AllocationId: !GetAtt NatGateway1EIP.AllocationId
+            SubnetId: !Ref PublicSubnet1
+
+    NatGateway2:
+        Type: AWS::EC2::NatGateway
+        Condition: MakePrivate
+        Properties:
+            AllocationId: !GetAtt NatGateway2EIP.AllocationId
+            SubnetId: !Ref PublicSubnet2
+
+    PublicRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Public Routes
+
+    DefaultPublicRoute:
+        Type: AWS::EC2::Route
+        DependsOn: InternetGatewayAttachment
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGateway
+
+    PublicSubnet1RouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            SubnetId: !Ref PublicSubnet1
+
+    PublicSubnet2RouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            SubnetId: !Ref PublicSubnet2
+
+
+    PrivateRouteTable1:
+        Type: AWS::EC2::RouteTable
+        Condition: MakePrivate
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Private Routes (AZ1)
+
+    DefaultPrivateRoute1:
+        Type: AWS::EC2::Route
+        Condition: MakePrivate
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable1
+            DestinationCidrBlock: 0.0.0.0/0
+            NatGatewayId: !Ref NatGateway1
+
+    PrivateSubnet1RouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Condition: MakePrivate
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable1
+            SubnetId: !Ref PrivateSubnet1
+
+    PrivateRouteTable2:
+        Type: AWS::EC2::RouteTable
+        Condition: MakePrivate
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+                - Key: Name
+                  Value: !Sub ${EnvironmentName} Private Routes (AZ2)
+
+    DefaultPrivateRoute2:
+        Type: AWS::EC2::Route
+        Condition: MakePrivate
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable2
+            DestinationCidrBlock: 0.0.0.0/0
+            NatGatewayId: !Ref NatGateway2
+
+    PrivateSubnet2RouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Condition: MakePrivate
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable2
+            SubnetId: !Ref PrivateSubnet2
+
+    NoIngressSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: "no-ingress-sg"
+            GroupDescription: "Security group with no ingress rule"
+            VpcId: !Ref VPC
+
+Outputs:
+  DBEndpoint:
+    Condition: MakeDatabase
+    Description: MySQL endpoint
+    Value: !GetAtt DevDB.Endpoint.Address
+  DBPort:
+    Condition: MakeDatabase
+    Description: MySQL Port
+    Value: !GetAtt DevDB.Endpoint.Port
+  Cloud9IDEUrl:
+    Description: Cloud9 Development Environment
+    Value: !Sub "https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${Cloud9}"
+  Cloud9InstanceName:
+    Description: The EC2 instance Name for the Cloud9 instance
+    Value: !Join [ "",["aws-cloud9-Cloud9-",!Ref Cloud9] ]
+    # Value: !GetAtt Cloud9.Name

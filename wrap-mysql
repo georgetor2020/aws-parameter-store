@@ -1,0 +1,11 @@
+#!/bin/bash
+host=devdbcluster-p2.cluster-cjdii2k9xlvv.us-east-2.rds.amazonaws.com
+user=$(aws ssm get-parameter --name /mydb/Dev/Login --query Parameter.Value  --output text)
+password=$(aws ssm get-parameter --name /mydb/Dev/Password --query Parameter.Value  --output text)
+echo user: $user
+echo password: $password
+cat - > ~/.my.cnf << EOF
+[client]
+password=$password
+EOF
+mysql -u $user -h $host 
