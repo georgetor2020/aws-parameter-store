@@ -1,0 +1,7 @@
+use DevDB;
+
+LOAD DATA INFILE 'data.txt' 
+INTO TABLE customer 
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
