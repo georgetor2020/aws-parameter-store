@@ -102,7 +102,7 @@ Resources:
                 AutoPause: true
                 MaxCapacity: 16
                 MinCapacity: 1
-                SecondsUntilAutoPause: 1200
+                SecondsUntilAutoPause: 1800
 
             Tags:
                 - Key: CostCenter
@@ -139,16 +139,6 @@ Resources:
             ToPort: 22
             GroupId: !Ref ClientSecurityGroup
             CidrIp: !Ref IngressIPforSSH
-
-# Allow inbound MySQL Requests                
-    # InboundMySQL:
-        # Type: AWS::EC2::SecurityGroupIngress
-        # Properties:
-            # IpProtocol: tcp
-            # FromPort: 3306
-            # ToPort: 3306
-            # SourceSecurityGroupId: !Ref ClientSecurityGroup
-            # GroupId: !Ref DBSecurityGroup
 
 # Allow inbound MySQL Requests                
     InboundMySQL:
@@ -409,7 +399,4 @@ Outputs:
   Cloud9IDEUrl:
     Description: Cloud9 Development Environment
     Value: !Sub "https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${Cloud9}"
-  Cloud9InstanceName:
-    Description: The EC2 instance Name for the Cloud9 instance
-    Value: !Join [ "",["aws-cloud9-Cloud9-",!Ref Cloud9] ]
-    # Value: !GetAtt Cloud9.Name
+
