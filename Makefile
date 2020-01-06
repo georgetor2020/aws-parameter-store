@@ -1,4 +1,4 @@
-stack=p2
+stack=ps
 template=parameter-store.yml
 parameters=parameters.json
 test:
@@ -21,3 +21,6 @@ delete:
 
 outputs:
 	aws cloudformation describe-stacks --stack-name ${stack} --query Stacks[].Outputs[] --output text
+
+check:
+	aws cloudformation describe-stack-resources --stack-name ${stack} --query StackResources[].[LogicalResourceId,ResourceStatus,Timestamp] --output table

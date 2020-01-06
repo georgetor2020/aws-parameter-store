@@ -167,7 +167,7 @@ Resources:
             AutomaticStopTimeMinutes: 30
             Description: Client environment for lab
             InstanceType: t2.micro
-            Name: Cloud9
+            Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, "AWS::StackName"] ]
 #            OwnerArn: String
 #            Repositories: 
 #                - RepositoryUrl: !Sub 'https://git-codecommit.${AWS::Region}.amazonaws.com/v1/repos/${RepositoryName}'
@@ -400,6 +400,8 @@ Outputs:
     Condition: MakeDatabase
     Description: MySQL endpoint
     Value: !GetAtt DevDB.Endpoint.Address
+    Export:
+        Name: DevDB-Endpoint
   DBPort:
     Condition: MakeDatabase
     Description: MySQL Port

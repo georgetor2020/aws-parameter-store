@@ -47,5 +47,6 @@ if __name__ == '__main__':
          }
       ]
    )
+   print('here are your parameters, from the parameter store:')
    pprint(r['Parameters'],indent=3)
 
