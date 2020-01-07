@@ -9,7 +9,6 @@ Parameters:
   DevLogin:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /mydb/Dev/Login
-
   DBCIDR1:
     Type: String
     Default: "10.2.202.0/24"
@@ -68,14 +67,7 @@ Parameters:
     Type: String
     Description: To skip building private subnets and their associated gateways, set False
     Default: False
-  
-  IngressIPforSSH:
-    Type: String
-    Description: Which IP Address to allow SSH access
-    Default: "97.91.155.94/32"
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
-
-    
+      
 Conditions:
   MakeDatabase:
     !Equals [ !Ref MakeDB, "True"]
@@ -100,7 +92,7 @@ Resources:
             StorageEncrypted: true
             ScalingConfiguration:
                 AutoPause: true
-                MaxCapacity: 16
+                MaxCapacity: 8
                 MinCapacity: 1
                 SecondsUntilAutoPause: 1800
 
@@ -131,16 +123,16 @@ Resources:
                   Value: !Join [ "-", [ "client-sg", !Ref EnvironmentName] ]
 
                 
-    InboundSSH:
-        Type: AWS::EC2::SecurityGroupIngress
-        Properties:
-            IpProtocol: tcp
-            FromPort: 22
-            ToPort: 22
-            GroupId: !Ref ClientSecurityGroup
-            CidrIp: !Ref IngressIPforSSH
+    # InboundSSH:
+        # Type: AWS::EC2::SecurityGroupIngress
+        # Properties:
+            # IpProtocol: tcp
+            # FromPort: 22
+            # ToPort: 22
+            # GroupId: !Ref ClientSecurityGroup
+            # CidrIp: !Ref IngressIPforSSH
 
-# Allow inbound MySQL Requests                
+# Allow inbound MySQL Requests               
     InboundMySQL:
         Type: AWS::EC2::SecurityGroupIngress
         Properties:
@@ -158,14 +150,145 @@ Resources:
             Description: Client environment for lab
             InstanceType: t2.micro
             Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, "AWS::StackName"] ]
+            Repositories:
+                - RepositoryUrl: https://github.com/dotstar/parameter-store
+                  PathComponent: /parameter-store
 #            OwnerArn: String
-#            Repositories: 
-#                - RepositoryUrl: !Sub 'https://git-codecommit.${AWS::Region}.amazonaws.com/v1/repos/${RepositoryName}'
-#                  PathComponent: !Sub 'codecommit/${RepositoryName}'
             SubnetId: !Ref PublicSubnet1
 
+    SQLLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            Description: "Allow SQLLambda function to access VPC and Parameter Store"
+            ManagedPolicyArns:
+                - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+            AssumeRolePolicyDocument:  
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                        Service:
+                        - lambda.amazonaws.com
+                      Action:
+                        - 'sts:AssumeRole'
+            Path: /
+            RoleName: !Join ["-",["basicLambdaAndParameterStore",!Ref "AWS::StackName"]]
+            Policies:
+                - PolicyName: GetParameters
+                  PolicyDocument:
+                    Version: 2012-10-17
+                    Statement:
+                      - Effect: Allow
+                        Action: 
+                            - ssm:GetParameter
+                            - ssm:GetParameters
+                            - ssm:GetParametersbyPath
+                            - ssm:DescribeParameters
+                        Resource: '*'
 
 
+    # SQL Function which gets parameters from parameter store and call SELECT from SQL
+    SQLLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: "Call DevDB with simple SELECT using Parameter Store"
+            Runtime: "python3.6"
+            Environment:
+                Variables:
+                    MySQLEndpoint: !GetAtt DevDB.Endpoint.Address
+                    MySQLPort: "3306"
+                    Environment: "Dev"
+                    ParamRoot: /mydb
+            FunctionName: !Join ["-",["ps",!Ref "AWS::StackName"]]
+            Handler: index.lambda_handler
+            Layers: 
+                - !Ref MySQLLambdaLayer
+            MemorySize: 128
+            Role: !GetAtt SQLLambdaRole.Arn
+            Timeout: 20
+            VpcConfig:
+                SubnetIds: 
+                    - !Ref PrivateSubnet1
+                    - !Ref PrivateSubnet2
+                SecurityGroupIds:
+                    - !Ref DBSecurityGroup
+                    - !Ref ClientSecurityGroup
+            Code:
+                ZipFile: |
+                    import boto3
+                    import os
+                    import json
+                    import mysql.connector
+
+                    ps = boto3.client('ssm', region_name='us-east-2')
+
+                    db = "DevDB"
+
+                    # Initialize SQL Endpoint, Port, and Parameter Store values from environment
+                    environment = os.environ.get('Environment', 'Dev')
+                    parameterRoot = os.environ.get('ParamRoot', '/mydb') + "/" + environment
+                    host = os.environ.get('MySQLEndpoint', " devdbcluster-ps.cluster-cjdii2k9xlvv.us-east-2.rds.amazonaws.com ")
+                    port = os.environ.get('MySQLPort', "3306")
+
+                    print("host:",host)
+
+                    # Get the login from parameter store
+                    login = ""
+                    password = ""
+                    try:
+                       print("calling get_parameter")
+                       login = ps.get_parameter(Name=(parameterRoot + "/Login"))['Parameter']['Value']
+                       # print("login: ", login)
+                       password = ps.get_parameter(Name=(parameterRoot + "/Password"))['Parameter']['Value']
+                       # print("password: ", password)
+                    except Exception as e:
+                       print("unknown exception", e)
+                       exit(1)
+
+                    # Connect to MySQL
+                    try:
+                       mydb = mysql.connector.connect(
+                          host=host,
+                          user=login,
+                          database=db,
+                          password=password
+                       )
+                    except Exception as e:
+                       print("error connecting to MySql: ",e)
+                       exit(2)
+                       
+
+                    def lambda_handler(event, context):
+                       print("event: ",event,"\n","-"*20)
+                       result = json.loads('{"Error": "SQL Failed"}')
+                       SQL = "SELECT * FROM customer LIMIT 10"
+                       try:
+                          mycursor = mydb.cursor()
+
+                          mycursor.execute(SQL)
+
+                          myresult = mycursor.fetchall()
+                          result = json.dumps(myresult)
+                       except Exception as e:
+                             print("error executing SQL: ",SQL," : ",e)
+                       return(result)
+                    if __name__ == '__main__':
+                       r = lambda_handler(event="",context="")
+                       print(r)
+            
+
+    MySQLLambdaLayer:
+        Type: AWS::Lambda::LayerVersion
+        Properties:
+            CompatibleRuntimes:
+                - python3.6
+                - python3.7
+                - python3.8
+            Description: MySQL Client Libraries and Boto3
+            LayerName: !Sub 'MySQLLayer-${AWS::StackName}'
+            Content:
+                S3Bucket: daveaws
+                S3Key: layers/mysql-layer.zip
             
     DBSubnetGroup:
         Type: AWS::RDS::DBSubnetGroup
@@ -251,7 +374,7 @@ Resources:
 
     PrivateSubnet1:
         Type: AWS::EC2::Subnet
-        Condition: MakePrivate
+        # Condition: MakePrivate
         Properties:
             VpcId: !Ref VPC
             AvailabilityZone: !Select [ 0, !GetAZs  '' ]
@@ -263,7 +386,7 @@ Resources:
 
     PrivateSubnet2:
         Type: AWS::EC2::Subnet
-        Condition: MakePrivate
+        # Condition: MakePrivate
         Properties:
             VpcId: !Ref VPC
             AvailabilityZone: !Select [ 1, !GetAZs  '' ]
@@ -378,12 +501,12 @@ Resources:
             RouteTableId: !Ref PrivateRouteTable2
             SubnetId: !Ref PrivateSubnet2
 
-    NoIngressSecurityGroup:
-        Type: AWS::EC2::SecurityGroup
-        Properties:
-            GroupName: "no-ingress-sg"
-            GroupDescription: "Security group with no ingress rule"
-            VpcId: !Ref VPC
+    # NoIngressSecurityGroup:
+        # Type: AWS::EC2::SecurityGroup
+        # Properties:
+            # GroupName: "no-ingress-sg"
+            # GroupDescription: "Security group with no ingress rule"
+            # VpcId: !Ref VPC
 
 Outputs:
   DBEndpoint:
@@ -392,11 +515,12 @@ Outputs:
     Value: !GetAtt DevDB.Endpoint.Address
     Export:
         Name: DevDB-Endpoint
-  DBPort:
-    Condition: MakeDatabase
-    Description: MySQL Port
-    Value: !GetAtt DevDB.Endpoint.Port
   Cloud9IDEUrl:
     Description: Cloud9 Development Environment
     Value: !Sub "https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${Cloud9}"
+  LambdaName:
+    Description: Name of the Lambda Function so that we can find it later from CLI tool
+    Value: !Ref SQLLambda
+    Export:
+        Name: DBLambda
 

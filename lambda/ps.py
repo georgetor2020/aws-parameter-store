@@ -1,51 +1,73 @@
 import boto3
-# from botocore.exceptions import ParameterNotFound
 import os
 import json
 import mysql.connector
 
 ps = boto3.client('ssm', region_name='us-east-2')
 
+db = "DevDB"
+
+# Initialize SQL Endpoint, Port, and Parameter Store values from environment
 environment = os.environ.get('Environment', 'Dev')
 parameterRoot = os.environ.get('ParamRoot', '/mydb') + "/" + environment
-host = os.environ.get('MySQL-Endpoint', " devdbcluster-ps.cluster-cjdii2k9xlvv.us-east-2.rds.amazonaws.com ")
-port = os.environ.get('MySQL-Port', "3306")
+host = os.environ.get('MySQLEndpoint', " devdbcluster-ps.cluster-cjdii2k9xlvv.us-east-2.rds.amazonaws.com ")
+port = os.environ.get('MySQLPort', "3306")
+
+print("host:", host)
 
 # Get the login from parameter store
 login = ""
 password = ""
 try:
+   print("calling get_parameter")
    login = ps.get_parameter(Name=(parameterRoot + "/Login"))['Parameter']['Value']
-   print("login: ", login)
+   # print("login: ", login)
    password = ps.get_parameter(Name=(parameterRoot + "/Password"))['Parameter']['Value']
-   print("password: ", password)
+   # print("password: ", password)
 except Exception as e:
    print("unknown exception", e)
    exit(1)
 
 # Connect to MySQL
-mydb = mysql.connector.connect(
-   host=host,
-   user=login,
-   password=password
-)
-print(mydb)
+try:
+   mydb = mysql.connector.connect(
+      host=host,
+      user=login,
+      database=db,
+      password=password
+   )
+except Exception as e:
+   print("error connecting to MySql: ", e)
+   exit(2)
+
+
+def lambda_handler2(event, context):
+   print("Hello from Lambda!")
+   return {
+      'statusCode': 200,
+      'body': json.dumps('Hello from Lambda!')
+   }
 
 
 def lambda_handler(event, context):
-   # print("Received event: " + json.dumps(event, indent=2))
-   print("value1 = " + event['key1'])
-   print("value2 = " + event['key2'])
-   print("value3 = " + event['key3'])
-   return event['key1']  # Echo back the first key value
-   # raise Exception('Something went wrong')
+   # print("event: ",event,"\n","-"*20)
+   result = {"Error": "SQL Failed"}
+   SQL = "SELECT * FROM customer LIMIT 10"
+   try:
+      mycursor = mydb.cursor()
+
+      mycursor.execute(SQL)
+
+      myresult = {}
+      myresult["body"] = mycursor.fetchall()
+      myresult["StatusCode"] = 202
+      result = json.dumps(myresult)
+      result = myresult
+      # result = myresult
+   except Exception as e:
+      print("error executing SQL: ", SQL, " : ", e)
+   return (result)
 
 # if __name__ == '__main__':
-# print(myparams)
-# r = ps.get_parameter(Name=myparams)
-# p = json.loads(r['Parameter']['Value'])
-# print(p)
-# login = p['Login']
-# password = p['Password']
-# print('login: ',login)
-# print('password:',password)
+#    r = lambda_handler(event="",context="")
+#    print(r)
