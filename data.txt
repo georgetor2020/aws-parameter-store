@@ -1,2 +1,0 @@
-"1","Bob","Smith","1 South Main","Centerville","IL","90909"
-"2","Sue","Smith","1 South Main","Centerville","IL","90909"

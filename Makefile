@@ -1,4 +1,4 @@
-stack=p2
+stack=p3
 template=parameter-store.yml
 parameters=parameters.json
 test:
@@ -28,5 +28,5 @@ outputs:
 layers:
 	cd lambda ; make
 
-check:
+resources:
 	aws cloudformation describe-stack-resources --stack-name ${stack} --query StackResources[].[LogicalResourceId,ResourceStatus,Timestamp] --output table
