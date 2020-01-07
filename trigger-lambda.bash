@@ -7,4 +7,4 @@ lambda=$(aws cloudformation list-exports --query 'Exports[][Name,Value]' --outpu
 echo Calling your lambda function $lambda
 
 outputfile=/tmp/out_$$.json
-aws lambda invoke --function-name ps-p2 ${outputfile} ; cat ${outputfile}; echo ; rm ${outputfile}
+aws lambda invoke --function-name $lambda ${outputfile} ; cat ${outputfile}; echo ; rm ${outputfile}
