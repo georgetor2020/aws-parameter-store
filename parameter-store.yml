@@ -284,11 +284,12 @@ Resources:
                 - python3.6
                 - python3.7
                 - python3.8
-            Description: MySQL Client Libraries and Boto3
-            LayerName: !Sub 'MySQLLayer-${AWS::StackName}'
+            Description: MySQL Client Libraries
+            LayerName: !Sub 'mysql-lambda-layer-${AWS::StackName}'
             Content:
                 S3Bucket: daveaws
-                S3Key: layers/mysql-layer.zip
+                # S3Key: layers/mysql-layer.zip
+                S3Key: layers/mysql-lambda-layer.zip
             
     DBSubnetGroup:
         Type: AWS::RDS::DBSubnetGroup

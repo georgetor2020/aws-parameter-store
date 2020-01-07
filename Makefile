@@ -24,6 +24,9 @@ delete:
 
 outputs:
 	aws cloudformation describe-stacks --stack-name ${stack} --query Stacks[].Outputs[] --output text
+	
+layers:
+	cd lambda ; make
 
 check:
 	aws cloudformation describe-stack-resources --stack-name ${stack} --query StackResources[].[LogicalResourceId,ResourceStatus,Timestamp] --output table
