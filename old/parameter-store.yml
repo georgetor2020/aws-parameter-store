@@ -94,7 +94,8 @@ Resources:
                 AutoPause: true
                 MaxCapacity: 8
                 MinCapacity: 1
-                SecondsUntilAutoPause: 1800
+                # Pause after 45 minutes with no connections
+                SecondsUntilAutoPause: 2700
 
             Tags:
                 - Key: CostCenter
@@ -123,15 +124,6 @@ Resources:
                   Value: !Join [ "-", [ "client-sg", !Ref EnvironmentName] ]
 
                 
-    # InboundSSH:
-        # Type: AWS::EC2::SecurityGroupIngress
-        # Properties:
-            # IpProtocol: tcp
-            # FromPort: 22
-            # ToPort: 22
-            # GroupId: !Ref ClientSecurityGroup
-            # CidrIp: !Ref IngressIPforSSH
-
 # Allow inbound MySQL Requests               
     InboundMySQL:
         Type: AWS::EC2::SecurityGroupIngress
@@ -205,7 +197,7 @@ Resources:
                 - !Ref MySQLLambdaLayer
             MemorySize: 128
             Role: !GetAtt SQLLambdaRole.Arn
-            Timeout: 20
+            Timeout: 45
             VpcConfig:
                 SubnetIds: 
                     - !Ref PrivateSubnet1

@@ -1,9 +1,6 @@
-#
-# Makefile for DB portion of Parameter Store Lab
-#
-stack=ps-db
-template=aurora.yaml
-parameters=aurora_parameters.json
+stack=ps-vpc
+template=vpc_cloud9.yaml
+parameters=vpc_cloud9_parameters.json
 test:
 	cfn-lint ${template} --ignore-checks W3010,W1001
 

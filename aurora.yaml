@@ -1,0 +1,214 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Creates a serverless Aurora database, with login information sourced from parameter store
+Parameters:
+
+  DevPass:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /mydb/Dev/Password
+    NoEcho: True
+  DevLogin:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /mydb/Dev/Login
+  EnvironmentName:
+    Description: An environment name that is prefixed to resource names
+    Type: String
+
+  
+Resources:
+          
+    DevDB:
+        Type: AWS::RDS::DBCluster
+        Properties:
+            Engine: aurora
+            EngineMode: serverless
+            DatabaseName: "DevDB"
+            MasterUsername: !Ref DevLogin
+            MasterUserPassword: !Ref DevPass
+            DBClusterIdentifier: !Join [ "-", ["DevDBCluster",!Ref "AWS::StackName"]]
+            DBSubnetGroupName: !ImportValue DBSubnetGroup
+            BackupRetentionPeriod: 1
+            DeletionProtection: false
+            StorageEncrypted: true
+            ScalingConfiguration:
+                AutoPause: true
+                MaxCapacity: 8
+                MinCapacity: 1
+                # Pause after 45 minutes with no connections
+                SecondsUntilAutoPause: 2700
+
+            Tags:
+                - Key: CostCenter
+                  Value: "1520"
+            VpcSecurityGroupIds:
+                - !Ref DBSecurityGroup
+          
+    DBSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: !Join [ "-", [ "db-sg", !Ref EnvironmentName] ]
+            GroupDescription: "database security group"
+            VpcId: !ImportValue VPCId
+            Tags:
+                - Key: Name
+                  Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName] ]
+        
+# Allow inbound MySQL Requests               
+    InboundMySQL:
+        Type: AWS::EC2::SecurityGroupIngress
+        Properties:
+            IpProtocol: tcp
+            FromPort: 3306
+            ToPort: 3306
+            SourceSecurityGroupId: !Ref DBSecurityGroup
+            GroupId: !Ref DBSecurityGroup             
+      
+           
+            
+    SQLLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            Description: "Allow SQLLambda function to access VPC and Parameter Store"
+            ManagedPolicyArns:
+                - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+            AssumeRolePolicyDocument:  
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                        Service:
+                        - lambda.amazonaws.com
+                      Action:
+                        - 'sts:AssumeRole'
+            Path: /
+            RoleName: !Join ["-",["basicLambdaAndParameterStore",!Ref "AWS::StackName"]]
+            Policies:
+                - PolicyName: GetParameters
+                  PolicyDocument:
+                    Version: 2012-10-17
+                    Statement:
+                      - Effect: Allow
+                        Action: 
+                            - ssm:GetParameter
+                            - ssm:GetParameters
+                            - ssm:GetParametersbyPath
+                            - ssm:DescribeParameters
+                        Resource: '*'
+
+
+    # SQL Function which gets parameters from parameter store and call SELECT from SQL
+    SQLLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: "Call DevDB with simple SELECT using Parameter Store"
+            Runtime: "python3.6"
+            Environment:
+                Variables:
+                    MySQLEndpoint: !GetAtt DevDB.Endpoint.Address
+                    MySQLPort: "3306"
+                    Environment: "Dev"
+                    ParamRoot: /mydb
+            FunctionName: !Join ["-",[!Ref EnvironmentName,!Ref "AWS::StackName"]]
+            Handler: index.lambda_handler
+            Layers: 
+                - !Ref MySQLLambdaLayer
+            MemorySize: 128
+            Role: !GetAtt SQLLambdaRole.Arn
+            Timeout: 45
+            VpcConfig:
+                SubnetIds: 
+                    - !ImportValue PrivateSubnet1Id
+                    - !ImportValue PrivateSubnet2Id
+                SecurityGroupIds:
+                    - !Ref DBSecurityGroup
+            Code:
+                ZipFile: |
+                    import boto3
+                    import os
+                    import json
+                    import mysql.connector
+
+                    ps = boto3.client('ssm', region_name='us-east-2')
+
+                    db = "DevDB"
+
+                    # Initialize SQL Endpoint, Port, and Parameter Store values from environment
+                    environment = os.environ.get('Environment', 'Dev')
+                    parameterRoot = os.environ.get('ParamRoot', '/mydb') + "/" + environment
+                    host = os.environ.get('MySQLEndpoint', " devdbcluster-ps.cluster-cjdii2k9xlvv.us-east-2.rds.amazonaws.com ")
+                    port = os.environ.get('MySQLPort', "3306")
+
+                    print("host:",host)
+
+                    # Get the login from parameter store
+                    login = ""
+                    password = ""
+                    try:
+                       print("calling get_parameter")
+                       login = ps.get_parameter(Name=(parameterRoot + "/Login"))['Parameter']['Value']
+                       # print("login: ", login)
+                       password = ps.get_parameter(Name=(parameterRoot + "/Password"))['Parameter']['Value']
+                       # print("password: ", password)
+                    except Exception as e:
+                       print("unknown exception", e)
+                       exit(1)
+
+                    # Connect to MySQL
+                    try:
+                       mydb = mysql.connector.connect(
+                          host=host,
+                          user=login,
+                          database=db,
+                          password=password
+                       )
+                    except Exception as e:
+                       print("error connecting to MySql: ",e)
+                       exit(2)
+                       
+
+                    def lambda_handler(event, context):
+                       print("event: ",event,"\n","-"*20)
+                       result = json.loads('{"Error": "SQL Failed"}')
+                       SQL = "SELECT * FROM customer LIMIT 10"
+                       try:
+                          mycursor = mydb.cursor()
+
+                          mycursor.execute(SQL)
+
+                          myresult = mycursor.fetchall()
+                          result = json.dumps(myresult)
+                       except Exception as e:
+                             print("error executing SQL: ",SQL," : ",e)
+                       return(result)
+                    if __name__ == '__main__':
+                       r = lambda_handler(event="",context="")
+                       print(r)
+            
+
+    MySQLLambdaLayer:
+        Type: AWS::Lambda::LayerVersion
+        Properties:
+            CompatibleRuntimes:
+                - python3.6
+                - python3.7
+                - python3.8
+            Description: MySQL Client Libraries
+            LayerName: !Sub 'mysql-lambda-layer-${AWS::StackName}'
+            Content:
+                S3Bucket: daveaws
+                # S3Key: layers/mysql-layer.zip
+                S3Key: layers/mysql-lambda-layer.zip
+            
+
+Outputs:
+  DBEndpoint:
+    Description: MySQL endpoint
+    Value: !GetAtt DevDB.Endpoint.Address
+    Export:
+        Name: DevDB-Endpoint
+
+  LambdaName:
+    Description: Name of the Lambda Function so that we can find it later from CLI tool
+    Value: !Ref SQLLambda
+    Export:
+        Name: DBLambda
+
