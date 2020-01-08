@@ -89,7 +89,7 @@ Resources:
             Repositories:
                 - RepositoryUrl: https://github.com/dotstar/parameter-store
                   PathComponent: /parameter-store
-            OwnerArn: !Sub  "arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey"
+            # OwnerArn: !Sub  "arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey"
             SubnetId: !Ref PublicSubnet1
       
     DBSubnetGroup:
