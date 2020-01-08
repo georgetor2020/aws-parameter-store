@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates a serverless Aurora database, with login information sourced from parameter store
 Parameters:
 
+  ParameterRoot:
+    Description: "Root of the parameter store (e.g. /mydb)"
+    Type: String
+    Default: "**CHANGE ME**"
   DevPass:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /mydb/Dev/Password
@@ -12,6 +16,12 @@ Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
+    Default: ps-rds
+  DatabaseName:
+    Description: "Name of the Database to create"
+    Type: String
+    Default: DevDB
+
 
   
 Resources:
@@ -21,7 +31,7 @@ Resources:
         Properties:
             Engine: aurora
             EngineMode: serverless
-            DatabaseName: "DevDB"
+            DatabaseName: !Ref DatabaseName
             MasterUsername: !Ref DevLogin
             MasterUserPassword: !Ref DevPass
             DBClusterIdentifier: !Join [ "-", ["DevDBCluster",!Ref "AWS::StackName"]]
@@ -45,12 +55,12 @@ Resources:
     DBSecurityGroup:
         Type: AWS::EC2::SecurityGroup
         Properties:
-            GroupName: !Join [ "-", [ "db-sg", !Ref EnvironmentName] ]
+            GroupName: !Join [ "-", [ "db-sg", !Ref EnvironmentName , !Ref "AWS::StackName" ] ]
             GroupDescription: "database security group"
             VpcId: !ImportValue VPCId
             Tags:
                 - Key: Name
-                  Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName] ]
+                  Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName] !Ref "AWS::StackName"  ]
         
 # Allow inbound MySQL Requests               
     InboundMySQL:
@@ -106,7 +116,7 @@ Resources:
                     MySQLEndpoint: !GetAtt DevDB.Endpoint.Address
                     MySQLPort: "3306"
                     Environment: "Dev"
-                    ParamRoot: /mydb
+                    ParamRoot: !Ref ParameterRoot
             FunctionName: !Join ["-",[!Ref EnvironmentName,!Ref "AWS::StackName"]]
             Handler: index.lambda_handler
             Layers: 

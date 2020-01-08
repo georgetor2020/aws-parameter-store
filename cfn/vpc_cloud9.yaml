@@ -71,7 +71,7 @@ Resources:
             AutomaticStopTimeMinutes: 30
             Description: Client environment for lab
             InstanceType: t2.micro
-            Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, "AWS::StackName"] ]
+            Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, !Ref "AWS::StackName"] ]
             Repositories:
                 - RepositoryUrl: https://github.com/dotstar/parameter-store
                   PathComponent: /parameter-store
@@ -85,7 +85,7 @@ Resources:
             AutomaticStopTimeMinutes: 30
             Description: Client environment for lab
             InstanceType: t2.micro
-            Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, "AWS::StackName"] ]
+            Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, !Ref "AWS::StackName"] ]
             Repositories:
                 - RepositoryUrl: https://github.com/dotstar/parameter-store
                   PathComponent: /parameter-store
@@ -105,30 +105,30 @@ Resources:
     DBSubnet01:
         Type: AWS::EC2::Subnet
         Properties:
-            # AvailabilityZone: "us-east-1a"
+            AvailabilityZone: "us-east-1a"
             CidrBlock: !Ref DBCIDR1
             VpcId: !Ref VPC
             Tags:
             - Key: Name
-              Value: !Join [ '-' , [ !Ref EnvironmentName,"db2a",!Ref "AWS::StackName" ] ]            
+              Value: !Join [ ' ' , [ !Ref EnvironmentName,!Ref "AWS::StackName" ]," (DB Subnet AZ1)" ]            
     DBSubnet02:
         Type: AWS::EC2::Subnet
         Properties:
-            # AvailabilityZone: "us-east-1b"
+            AvailabilityZone: "us-east-1b"
             CidrBlock: !Ref DBCIDR2
             VpcId: !Ref VPC
             Tags:
             - Key: Name
-              Value: !Join [ '-' , [ !Ref EnvironmentName,"db2b",!Ref "AWS::StackName" ] ]            
+              Value: !Join [ ' ' , [ !Ref EnvironmentName,!Ref "AWS::StackName" ]," DB Subnet (AZ2)"  ]            
     DBSubnet03:
         Type: AWS::EC2::Subnet
         Properties:
-            # AvailabilityZone: "us-east-1c"
+            AvailabilityZone: "us-east-1c"
             CidrBlock: !Ref DBCIDR3
             VpcId: !Ref VPC
             Tags:
             - Key: Name
-              Value: !Join [ '-' , [ !Ref EnvironmentName,"db2c",!Ref "AWS::StackName" ] ]
+              Value: !Join [ ' ' , [ !Ref EnvironmentName,!Ref "AWS::StackName" ] ," DB Subnet (AZ3)" ]
     VPC:
         Type: AWS::EC2::VPC
         Properties:

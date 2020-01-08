@@ -3,7 +3,7 @@ import os
 import json
 import mysql.connector
 
-ps = boto3.client('ssm', region_name='us-east-2')
+ps = boto3.client('ssm')
 
 db = "DevDB"
 
@@ -19,11 +19,16 @@ print("host:", host)
 login = ""
 password = ""
 try:
-   print("calling get_parameter")
-   login = ps.get_parameter(Name=(parameterRoot + "/Login"))['Parameter']['Value']
+   param = parameterRoot + "/Login"
+   print("calling get_parameter with parameter {}".format(param))
+   login = ps.get_parameter(Name=param)['Parameter']['Value']
    # print("login: ", login)
-   password = ps.get_parameter(Name=(parameterRoot + "/Password"))['Parameter']['Value']
+   
+   param = parameterRoot + "/Password"
+   print("calling get_parameter with parameter {}".format(param))
+   password = ps.get_parameter(Name=param)['Parameter']['Value']
    # print("password: ", password)
+
 except Exception as e:
    print("unknown exception", e)
    exit(1)
