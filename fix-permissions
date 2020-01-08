@@ -2,7 +2,7 @@
 # git mis-behaves if you develop on Windows.  Need to explicitly define executables for shell scripts
 #
 
-for f in wrap-mysql trigger-lambda init/init-params.py
+for f in lab2/wrap-mysql lab3/trigger-lambda lab1/init-params.py
 do
   echo git update-index --chmod=+x $f
 done
