@@ -18,57 +18,55 @@ Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
+    Default: ps-lab
 
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
-    Default: 10.192.0.0/16
+    Default: 10.2.0.0/16
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
 
 
   PublicSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
-    Default: 10.192.10.0/24
+    Default: 10.2.1.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
 
   PublicSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
     Type: String
-    Default: 10.192.11.0/24
+    Default: 10.2.2.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
 
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
-    Default: 10.192.20.0/24
+    Default: 10.2.11.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
 
   PrivateSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
-    Default: 10.192.21.0/24
+    Default: 10.2.12.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  IsEventEngine:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+
   
+Conditions:
+  EventEngine: !Equals [ !Ref IsEventEngine, true]
+  NotEventEngine: !Equals [ !Ref IsEventEngine, false]
 
-Resources:
+Resources:  
           
-    ClientSecurityGroup:
-        Type: AWS::EC2::SecurityGroup
-        Properties:
-            GroupName: !Join [ "-", [ "client-sg", !Ref EnvironmentName] ]
-            GroupDescription: "client security group"
-            VpcId: !Ref VPC
-            Tags:
-                - Key: Name
-                  Value: !Join [ "-", [ "client-sg", !Ref EnvironmentName] ]
-
-                
-            
-           
-            
-    Cloud9:
+    Cloud9EE:
         Type: AWS::Cloud9::EnvironmentEC2
+        Condition: EventEngine
         Properties: 
             AutomaticStopTimeMinutes: 30
             Description: Client environment for lab
@@ -77,13 +75,23 @@ Resources:
             Repositories:
                 - RepositoryUrl: https://github.com/dotstar/parameter-store
                   PathComponent: /parameter-store
-#            OwnerArn: String
+            OwnerArn: !Sub  "arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey"
             SubnetId: !Ref PublicSubnet1
-
-    
             
-
-       
+    Cloud9:
+        Type: AWS::Cloud9::EnvironmentEC2
+        Condition: NotEventEngine
+        Properties: 
+            AutomaticStopTimeMinutes: 30
+            Description: Client environment for lab
+            InstanceType: t2.micro
+            Name: !Join [ "-", [ "Cloud9", !Ref EnvironmentName, "AWS::StackName"] ]
+            Repositories:
+                - RepositoryUrl: https://github.com/dotstar/parameter-store
+                  PathComponent: /parameter-store
+            OwnerArn: !Sub  "arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey"
+            SubnetId: !Ref PublicSubnet1
+      
     DBSubnetGroup:
         Type: AWS::RDS::DBSubnetGroup
         Properties:
@@ -97,7 +105,7 @@ Resources:
     DBSubnet01:
         Type: AWS::EC2::Subnet
         Properties:
-            AvailabilityZone: "us-east-2a"
+            # AvailabilityZone: "us-east-1a"
             CidrBlock: !Ref DBCIDR1
             VpcId: !Ref VPC
             Tags:
@@ -106,7 +114,7 @@ Resources:
     DBSubnet02:
         Type: AWS::EC2::Subnet
         Properties:
-            AvailabilityZone: "us-east-2b"
+            # AvailabilityZone: "us-east-1b"
             CidrBlock: !Ref DBCIDR2
             VpcId: !Ref VPC
             Tags:
@@ -115,7 +123,7 @@ Resources:
     DBSubnet03:
         Type: AWS::EC2::Subnet
         Properties:
-            AvailabilityZone: "us-east-2c"
+            # AvailabilityZone: "us-east-1c"
             CidrBlock: !Ref DBCIDR3
             VpcId: !Ref VPC
             Tags:
@@ -286,10 +294,6 @@ Resources:
 
 
 Outputs:
-  Cloud9IDEUrl:
-    Description: Cloud9 Development Environment
-    Value: !Sub "https://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${Cloud9}"
-
   DBSubnetGroup:
     Description: subnet, created for Aurora
     Value: !Ref DBSubnetGroup

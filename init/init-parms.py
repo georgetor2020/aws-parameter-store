@@ -3,9 +3,9 @@ from pprint import pprint
 import json
 
 
-inputfile = "secrets.json"
+inputfile = "parameters.json"
 topkey = '/mydb'
-ps = boto3.client('ssm',region_name='us-east-2')
+ps = boto3.client('ssm',region_name='us-east-1')
 
 
 if __name__ == '__main__':

@@ -1,0 +1,10 @@
+{
+  "Dev": {
+    "Login": "admin",
+    "Password": "CHANGE-ME-NOW"
+  },
+  "Prod": {
+    "Login": "admin",
+    "Password": "CHANGE-ME-NOW"
+  }
+}

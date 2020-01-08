@@ -22,7 +22,7 @@ delete:
 	aws cloudformation delete-stack --stack-name ${stack}
 
 outputs:
-	aws cloudformation describe-stacks --stack-name ${stack} --query Stacks[].Outputs[] --output text
+	aws cloudformation describe-stacks --stack-name ${stack} --query Stacks[].Outputs[] 
 	
 layers:
 	cd lambda ; make
