@@ -60,7 +60,7 @@ Resources:
             VpcId: !ImportValue VPCId
             Tags:
                 - Key: Name
-                  Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName] !Ref "AWS::StackName"  ]
+                  Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName, !Ref "AWS::StackName"  ] ]
         
 # Allow inbound MySQL Requests               
     InboundMySQL:
