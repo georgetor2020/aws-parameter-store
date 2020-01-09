@@ -62,6 +62,36 @@ In the command line of Cloud9, run the helper script.
   python init-parms.py
 </pre>
 
+The expected output from running these commands:
+```
+here are your parameters, from the parameter store:
+[  {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Dev/Login',
+      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 28, 944000, tzinfo=tzlocal()),
+      'Name': '/mydb/Dev/Login',
+      'Type': 'String',
+      'Value': 'admin',
+      'Version': 2},
+   {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Dev/Password',
+      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 28, 987000, tzinfo=tzlocal()),
+      'Name': '/mydb/Dev/Password',
+      'Type': 'String',
+      'Value': 'CHANGE-ME-NOW',
+      'Version': 3},
+   {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Prod/Login',
+      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 29, 66000, tzinfo=tzlocal()),
+      'Name': '/mydb/Prod/Login',
+      'Type': 'String',
+      'Value': 'admin',
+      'Version': 2},
+   {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Prod/Password',
+      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 29, 105000, tzinfo=tzlocal()),
+      'Name': '/mydb/Prod/Password',
+      'Type': 'String',
+      'Value': 'CHANGE-ME-NOW',
+      'Version': 2}]
+
+```
+
 <details>
 Here is the code to our helper script.  It parses values from a JSON input file and calls put_parameter() to copy these values to Parameter store.  Note the use of a hierarchy of parameters.  There is on tree for _Pub_ and a seperate one for _Dev_ instances.  In the real world, we would likely have different permissions for each of these paths, so that the whole world wouldn't have access to production credentials.
 
@@ -118,10 +148,27 @@ if __name__ == '__main__':
 ````
 </details>
 
+2. Change a parameter
 
-AWS X-Ray is a distributed tracing service that provides a SDK to instrument your applications, a daemon to aggregate and deliver trace data to the X-Ray service, and a dashboard to view a service map which is a visualization of the trace data. If you would like to read more in depth about X-Ray, check out these links to documentation - [What is X-Ray?](https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html) and [X-Ray Concepts](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html)
+Let's change the value of the development database password in Parameter Store.  We will use the GUI, but of course you could do this via API or CloudFormation, if desired.
 
-In this lab, you'll continue where our lead developer left off before she was pulled to work on personalization for the application. No surprises there since the PM just got back from re:Invent, and there were many AI/ML sessions in his schedule.
+Navigate to the parameter store service.  Parameter store is part of AWS System Manager.  From the console, you can enter "parameter" or "ssm" or "systems manager".
+
+![Systems Manager Parameter Store Console Search](./img/1.png)
+
+![Systems Manager Parameter Store Console ](./img/2.png)
+
+
+For this workshop, we will build an Aurora Serverless Database from Cloudformation.  Cloudformation will obtain the administrative credentials from Parameter store.
+Select the Parameter /mydb/Dev/Password and edit the password.  Save it when you are complete, and don’t forget what you typed.  You will use it later.
+
+Hint - the password needs to be one which MySQL accepts.  By the default, the constraints on the master password are:
+##At least 8 printable ASCII characters. Can't contain any of the following: / (slash), "(double quote) and @ (at sign)##
+
+![Edit Parameter ](./img/3.png)
+
+![Edit Parameter Value ](./img/4.png)
+
 
 ![Lab 1 X-Ray](./images/lab-1.png)
 
