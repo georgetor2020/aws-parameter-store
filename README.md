@@ -1,10 +1,9 @@
 # Parameter Store workshop
 
 ## Overview
-![welcome](/img/1.png)
 
 
-AWS Systems Manager Parameter store and AWS Secrets Manager provide secure, storage for configuration data and secrets management.  You can store values as plaintext (unencrypted data) or ciphertext (encrypted data). You can then reference values by using the unique name that you specified when you created the parameter. Highly scalable, available, and durable, Parameter Store is backed by the AWS Cloud.
+_AWS Systems Manager Parameter Store_ and _AWS Secrets Manager_ provide secure, highly available storage for configuration data and secrets.  You can store values as plaintext (unencrypted data) or ciphertext (encrypted data). You can then reference values by using the unique name that you specified when you created the parameter. Highly scalable, available, and durable, Parameter Store is backed by the AWS Cloud.
 
 In this lab, we will focus on the basics of Parameter Store.
 
@@ -13,17 +12,17 @@ In this lab, we will focus on the basics of Parameter Store.
 ### Requirements
 
 * AWS account - if you're doing this workshop as a part of an AWS event, you will be provided an account through a platform called Event Engine. The workshop administrator will provide instructions. If the event specifies you'll need your own account or if you're doing this workshop on your own, it's easy and free to [create an account](https://aws.amazon.com/) if you do not have one already.
-* If using your own AWS account, We haven't finished the setup.
+* If using your own AWS account, We haven't finished the setup documentation.
 
-Familiarity with AWS, Python, Cloudformation, and Lambda is a plus but not required.
+Familiarity with AWS, Python, CloudFormation, EC2, and Lambda is a plus but not required.
 
 ### What you'll do
 
-The labs in the workshop are designed to be completed in sequence, and the full set of instructions are documented in each lab. Read and follow the instructions to complete each of the labs. Don't worry if you get stuck, we provide hints along the way.
+The labs in the workshop are designed to be completed in sequence, and the full set of instructions are documented in each lab.  Read and follow the instructions to complete each of the labs.  Don't worry if you get stuck, we provide hints along the way.
 
 * **[Lab 1](lab1):** Add your Secrets to Parameter Store
 * **[Lab 2](lab2):** Create an Aurora Serverless MySQL cluster
-* **[Lab 3](lab3):** Verify that you can access your AWS Lambda
+* **[Lab 3](lab3):** Verify that you can access your data with AWS Lambda
 
 ### Conventions
 
@@ -36,17 +35,7 @@ Throughout this workshop, we will provide commands for you to run in a terminal.
 </pre>
 
 
-#### 2. Unique values
-
-If you see ***UPPER_ITALIC_BOLD*** text, that means you need to enter a value unique to your environment. For example, the ***PRIVATE\_KEY.PEM*** above refers to the private key of an SSH key pair that's specific to your account; similarly, the ***EC2_PUBLIC_DNS_NAME*** refers to the DNS name of an EC2 instance in your account.
-
-All unique values required throughout the workshop are captured as outputs from the CloudFormation template you'll launch to set up the workshop environment. You can, of course, also visit the specific service's dashboard in the [AWS management console](https://console.aws.amazon.com).
-
-#### 3. Specific values or text
-
-If you are asked to enter a specific value or text, it will formatted like this - `verbatim`.
-
-#### 4. Hints
+#### 2. Hints
 
 Hints are also provided along the way and will look like this:
 
@@ -57,6 +46,10 @@ Hints are also provided along the way and will look like this:
 </details>
 
 *Click on the arrow to show the contents of the hint.*
+
+#### 3. Details
+
+If you are curious, there are a few sections of the lab which you may expand by hitting the <details><summary>details</summary></details> Link.
 
 ### IMPORTANT: Workshop Cleanup
 
