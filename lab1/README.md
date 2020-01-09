@@ -3,14 +3,14 @@
 
 ## Workshop progress
 
-**Lab 1: Add your Secrets to Parameter Store**
+**Lab 1: Add your secrets to Parameter Store**
 
 [Lab 2: Operationalize Observability - Aggregate Metrics](../lab2)
 
 [Lab 3: Create an Aurora Serverless MySQL cluster](../lab3)
 
 
-## LAB 1 - Parameter Store
+## LAB 1 - Add your secrets to Parameter Store
 
 Parameter Store, part of AWS Systems Manager, provides a secure depot for managing credentials and configuration details.  Among the challenges of distributed applications development is how to keep configuration and credentials details consistent across a wide variety of technologies such as Infrastructure as Code (CloudFormation, Teraform), traditional applications on virtual machines, containers, and serverless.
 
@@ -47,7 +47,7 @@ From the AWS console, navigate to Cloud8 and "Open IDE"
 </div>
 When Cloud9 initializes, it will *automatically* download the github content from https://github.com/dotstar/parameter-store.
 
-Time to initialize our parameters.  We are going to create a MySQL database with administrative access managed by Parameter Store.
+Time to initialize our parameters.  We are going to create a MySQL database with administrative access provided by Parameter Store.
 
 ## 2. Create Parameters
 
@@ -178,17 +178,18 @@ Hint - the password needs to be one which MySQL accepts.  By the default, the co
 
 
 ![Edit Parameter Value ](./img/4.png)
->/div>
+
+</div>
 
 ## 4. Check your work
 
-Return to the CLI (in Cloud9) , inspect parameter store to validate that the login and password are as you set them.
+Return to the CLI (in Cloud9) , inspect parameter store to validate that the login and password are as you set them.  From the CLI, issue the _ssm_ command to view a path of parameters.
 
 <pre>
   aws ssm get-parameters-by-path --path /mydb --recursive
 </pre>
 
-When you are satisfied that you’ve changed the Dev password, proceed to lab2, creating a database
+When you are satisfied that you’ve changed the Dev password, proceed to [lab2](../lab2), creating a database
 
 ### Checkpoint
 
