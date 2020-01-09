@@ -197,7 +197,7 @@ Congratulations!!!  You've successfully added parameters and edited the default 
 
 Proceed to [Lab 2](../lab2)!
 
-[*^ back to top*](#lab2)
+[*^ back to top*](#lab1)
 
 ## Participation
 
