@@ -50,10 +50,18 @@ One would normally type in parameters one at a time, from the GUI, CLI, API, or 
 
 In the command line of Cloud9, run the helper script.
 
+<details>
+<summary>HINT</summary>
+
+**Press ALT-t to open a larger terminal window**
+</details>
+
+
 <pre>
   cd ~/environment/parameter-store/lab1
   python init-parms.py
 </pre>
+
 
 
 
