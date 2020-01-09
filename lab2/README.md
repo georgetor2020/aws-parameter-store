@@ -21,13 +21,14 @@ In this first lab, we will create a Serverless MySQL database using our _Dev_ pa
 <details>
 We could have used any database, or other AWS service which requires credentials or configuration detail.  
 
-The lab is using a Serverless version of Aurora for it's unique ability to scale to 0.  With Serverless Aurora, after a period of time when there are no connections to the database, it shutsdown.  This is particularly interesting for a development or lab database, as it is very cost effective.  When the database is down, you pay for just the storage used.  It's a simple, cost-effective option for infrequent, intermittent, or unpredictable workloads.
 
-When a connection is received, the database restarts.  The database restart time is elongated, typically between 20 and 40 seconds.  After this one "cold start", connection times are comparable with other MySQL databases.
+The lab is using a serverless version of Aurora for it's unique ability to scale to 0.  With Serverless Aurora, after a period of time when there are no connections to the database, it shutsdown.  This is particularly valuable for a development or lab database, as it is very cost effective.  When the database is down, you pay for only the storage used.  It's a simple, cost-effective option for infrequent, intermittent, or unpredictable workloads.
+
+When a connection is received, the database restarts.  The database restart time is elongated, typically between 20 and 40 seconds.  After this one _"cold start"_, connection times are comparable with other MySQL databases.
 </details>
 
 
-One way to do this in cloud9, is to navigate to lab2 in Cloud9's left panel, and double click on the file named **aurora.yaml.**
+One way to edit a file in cloud9, is to navigate to lab2 in Cloud9's left panel, and double click on the file named **aurora.yaml.**
 
 <div align="center">
 
@@ -37,7 +38,9 @@ One way to do this in cloud9, is to navigate to lab2 in Cloud9's left panel, and
 
 </div>
 
-Edit the template parameter named “ParameterRoot”.  Set the Default value to the root of your parameter store _/mydb_).
+
+Edit the template parameter named “ParameterRoot”.  **Set the default value to the root of your parameter store _/mydb_**.
+
 
 <div align="center">
 
@@ -49,7 +52,7 @@ Note that the following two template parameters have been pre-populated to set v
 
 Save the CloudFormation template, and create a stack.  The stack will create an Aurora MySQL serverless database, and a lambda function.  We’ll come back to the lambda in the next lab.
 
-## 1. 2.	Create the database, using CloudFormation
+## 2. Create the database, using CloudFormation
 
 We will invoke CloudFormation from the CLI.
 
@@ -71,173 +74,155 @@ The CLI returns output similar to:
 ```
 <div align="center">
 
-![Cloud9 IDE](../img/4.png)
-</div>
-When Cloud9 initializes, it will *automatically* download the github content from https://github.com/dotstar/parameter-store.
 
-Time to initialize our parameters.  We are going to create a MySQL database with administrative access provided by Parameter Store.
+It takes several minutes to create the database.  Navigate to CloudFormation on the console to monitor progress.
 
-## 2. Create Parameters
+## 3. Enable your Cloud9 instance to network with the database
 
-Here is the hierarchy of parameters we will create.
+After CloudFormation instantiates the database, we are ready to use it.
+
+Before we can connect the Cloud9 terminal to the database, we need to give it network access.  Add your cloud9 instance to the security group similar to db-sg-ps-rds-rds-ps.  This security group allows inbound access to port 3306, which is the default MySQL listener.  By adding your cloud9 instance to this SG, you are enabling it to talk to the database.
+
+Navigate to EC2 in the console.
 
 <div align="center">
 
-![Parameter Hierarcy](../img/5.png)
+![EC2 Instance Selection](./img/3.png)
 
 </div>
 
-One would normally type in parameters one at a time, from the GUI, CLI, API, or CloudFormation.  For this lab, there is a helper script to speed things up a bit.
+Select your cloud9 instance and Actions -> Networking -> Change Security Groups
 
-In the command line of Cloud9, run the helper script.
+
+<div align="center">
+
+![Change Security Group](./img/4.png)
+
+
+![Security Group Popup](./img/5.png)
+
+
+</div
+
+## 3. Test database connectivity
+
+After CloudFormation instantiates the database, we are ready to use it.  
+
+**Make sure the CloudFormation build is complete before proceeding.**
+
+Typically with MySQL, the CLI syntax is similar to:
+``` Mysql -h database-hostname -u user -p password ```
+
+You could use this syntax to connect.  To do this, we’d need to lookup the name of the database which was just created and either recall the username/password combination or retrieve that information from the database.
+
+For this lab, we’ve created a helper script which lookups up these details for you, called wrap-mysql.  Since this is a lab, we’re printing the login and password to the terminal.  Obviously you wouldn’t do that in real life.
 
 <details>
-<summary>HINT</summary>
 
-**Press ALT-t to open a larger terminal window**
+The wrapper script pulls the hostname from CloudFormation's output and gets login/password information from Parameter store.  Here is the wrapper script:
+```
+#!/bin/bash
+
+# Get the database name from cloudformation export
+host=$(aws cloudformation list-exports --query 'Exports[][Name,Value]' --output text | grep DevDB-Endpoint | cut -f 2)
+echo host: $host
+
+# Get login and password information from parameter store
+user=$(aws ssm get-parameter --name /mydb/Dev/Login --query Parameter.Value  --output text)
+password=$(aws ssm get-parameter --name /mydb/Dev/Password --query Parameter.Value  --output text)
+
+echo user: $user
+echo password: $password
+
+# set the password as MySQL default password
+# by creating a new $HOME/.my.cnf
+cat - > ~/.my.cnf << EOF
+[client]
+password=$password
+EOF
+mysql -u $user -h $host 
+
+```
 </details>
 
+Connect to the database
 
 <pre>
-  cd ~/environment/parameter-store/lab1
-  python init-parms.py
+cd ~/environment/parameter-store/lab2
+./wrap-mysql
 </pre>
 
-The expected output from running these commands:
-```
-here are your parameters, from the parameter store:
-[  {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Dev/Login',
-      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 28, 944000, tzinfo=tzlocal()),
-      'Name': '/mydb/Dev/Login',
-      'Type': 'String',
-      'Value': 'admin',
-      'Version': 2},
-   {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Dev/Password',
-      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 28, 987000, tzinfo=tzlocal()),
-      'Name': '/mydb/Dev/Password',
-      'Type': 'String',
-      'Value': 'CHANGE-ME-NOW',
-      'Version': 3},
-   {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Prod/Login',
-      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 29, 66000, tzinfo=tzlocal()),
-      'Name': '/mydb/Prod/Login',
-      'Type': 'String',
-      'Value': 'admin',
-      'Version': 2},
-   {  'ARN': 'arn:aws:ssm:us-east-1:233363133948:parameter/mydb/Prod/Password',
-      'LastModifiedDate': datetime.datetime(2020, 1, 8, 20, 0, 29, 105000, tzinfo=tzlocal()),
-      'Name': '/mydb/Prod/Password',
-      'Type': 'String',
-      'Value': 'CHANGE-ME-NOW',
-      'Version': 2}]
+When you are connected, you should see output similar to:
 
 ```
+host: devdbcluster-rds-ps.cluster-cqhyviwu3hz1.us-east-1.rds.amazonaws.com
+user: admin
+password: CHANGE-ME-NOW
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 9
+Server version: 5.6.10 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+```
+
+
+**Type exit, or ^D to exit.**
+
+Let's add some data to the database.
+
+<pre>
+cd ~/environment/parameter-store/lab2
+./wrap-mysql < create-table.sql
+</pre>
+
+Now validate that the insert worked.
+
+<pre>
+cd ~/environment/parameter-store/lab2
+./wrap-mysql < describe-table.sql
+</pre>
 
 <details>
-Here our helper script code.  
-
-It parses values from a JSON input file and calls put_parameter() to copy these values to Parameter store.  
-
-Note the use of a hierarchy of parameters.  There is on tree for _Pub_ and a seperate one for _Dev_ instances.  In the real world, we would likely have different permissions for each of these paths, so that the whole world wouldn't have access to production credentials.
+This should result in the following output:
+```
+host: devdbcluster-rds-ps.cluster-cqhyviwu3hz1.us-east-1.rds.amazonaws.com
+user: admin
+password: CHANGE-ME-NOW
+Field   Type    Null    Key     Default Extra
+customer_id     int(11) NO      PRI     NULL    auto_increment
+first_name      varchar(255)    YES             NULL
+last_name       varchar(255)    YES             NULL
+street_address  varchar(255)    YES             NULL
+city    varchar(255)    YES             NULL
+state   varchar(255)    YES             NULL
+zip     varchar(10)     YES             NULL
+customer_id     first_name      last_name       street_address  city    state   zip
+1       Jane    Smith   1 South Main    Springfield     OH      43215
+2       John    Smith   1 South Main    Springfield     IL      43215
+3       Amy     Simpson 11 South Main   Springfield     MO      43215
+4       Jack    Frank   12 South Main   Springfield     TX      43215
 
 ```
-import boto3
-from pprint import pprint
-import json
-
-
-inputfile = "parameters.json"
-topkey = '/mydb'
-ps = boto3.client('ssm',region_name='us-east-1')
-
-
-if __name__ == '__main__':
-   with open(inputfile,"r") as myfile:
-      data = myfile.read()
-   obj = json.loads(data)
-   # print (obj)
-
-   # Initialize Parameters for Dev
-   try:
-      for env in ['Dev','Prod']:
-         # Put login information into parameter store
-         ps.put_parameter(
-            Name = topkey + '/' + env + '/'+ 'Login',
-            Description = "Login for " + env + "MyDB",
-            Value = obj[env]['Login'],
-            Type = 'String',
-            Overwrite = True
-         )
-         # Put password information into parameter store
-         ps.put_parameter(
-            Name = topkey + '/' + env + '/'+ 'Password',
-            Description="Password for " + env + "MyDB",
-            Value = obj[env]['Password'],
-            Type = 'String',
-            Overwrite=True
-         )
-   except Exception as e:
-      print(e)
-      print('exiting')
-      exit
-
-   print('contents of {} key in parameter store:'.format(topkey))
-   r = ps.get_parameters_by_path(
-      Path=topkey,
-      Recursive=True,
-      MaxResults=10
-   )
-   print('here are your parameters, from the parameter store:')
-   pprint(r['Parameters'],indent=3)
-
-````
 </details>
 
-## 3. Change a Parameter
+Now that you’ve created a database and added a small table, time to move to [lab3](../lab3), using parameter store from your applications.
 
-Let's change the value of the development database password in Parameter Store.  We will use the GUI, but of course you could do this via API or CloudFormation, if desired.
-
-Navigate to the parameter store service.  Parameter store is part of AWS System Manager.  From the console, you can enter "parameter" or "ssm" or "systems manager".
-<div align="center">
-
-![Systems Manager Parameter Store Console Search](./img/1.png)
-
- 
-
-![Systems Manager Parameter Store Console ](./img/2.png)
-</div>
-
-For this workshop, we will build an Aurora Serverless Database from Cloudformation.  Cloudformation will obtain the administrative credentials from Parameter store.
-Select the Parameter /mydb/Dev/Password and edit the password.  Save it when you are complete, and don’t forget what you typed.  You will use it later.
-
-**Be certain that the password complies with MySQL requirements.  By the default, the constraints on the master password are: _At least 8 printable ASCII characters. Can't contain any of the following: / (slash), "(double quote) and @ (at sign)_**
-
-<div align="center">
-
-![Edit Parameter ](./img/3.png)
-
-
-![Edit Parameter Value ](./img/4.png)
-
-</div>
-
-## 4. Check your work
-
-Return to the CLI (in Cloud9) , inspect parameter store to validate that the login and password are as you set them.  From the CLI, issue the _ssm_ command to view a path of parameters.
-
-<pre>
-  aws ssm get-parameters-by-path --path /mydb --recursive
-</pre>
-
-When you are satisfied that you’ve changed the Dev password, proceed to [lab2](../lab2), creating a database
 
 ### Checkpoint
 
-Congratulations!!!  You've successfully added parameters and edited the default administrative password. On to the next lab!
+Congratulations!!!  You've successfully created a database based on the parameters you added in lab1.  Time to go to the next lab.
 
-Proceed to [Lab 2](../lab2)!
+Proceed to [Lab 3](../lab3)!
 
-[*^ back to top*](#lab1)
+[*^ back to top*](#lab2)
 
 ## Participation
 
