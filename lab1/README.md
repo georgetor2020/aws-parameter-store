@@ -27,12 +27,15 @@ Enter your 12-digit hash and Accept.
 Select AWS Console. 
 
 <div align="center">
+
 ![AWS Console button](../img/2.png)
->/div>
+</div>
 
 And again on the Team Dashboard, select Console 
 <div align="center">
+
 ![AWS Console button 2](../img/3.png)
+
 </div>
 
 From the AWS console, navigate to Cloud8 and "Open IDE"
