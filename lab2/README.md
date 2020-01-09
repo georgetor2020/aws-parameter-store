@@ -14,7 +14,7 @@
 
 In this lab, we will modify a CloudFormation template to use the parameters you just edited.
 
-## 1. Setup CloudFormation Template
+## 1. Setup the CloudFormation template
 
 In this first lab, we will create a Serverless MySQL database using our _Dev_ parameters.  We need to edit the CloudFormation template file, ~/environment/parameter-store/lab2/aurora.yaml.
 
@@ -222,8 +222,6 @@ Now that you’ve created a database and added a small table, time to move to [l
 Congratulations!!!  You've successfully created a database based on the parameters you added in lab1.  Time to go to the next lab.
 
 Proceed to [Lab 3](../lab3)!
-
-[*^ back to top*](#lab2)
 
 ## Participation
 
