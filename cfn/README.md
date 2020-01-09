@@ -1,15 +1,9 @@
 # Parameter Store workshop
 
 
-## Workshop progress
-
 ## Lab 0: Build the VPC
 
-<div align="center">
-
-#Only do this part if you are running in your own AWS account.  If you are at an AWS event, using _Event Engine_ this will fail.
-
-</div>
+##Only do this part if you are running in your own AWS account.  If you are at an AWS event, using _Event Engine_ this will fail.
 
 If you are here, you need to setup the VPC, prior to running the Parameter store lab.  There is a CloudFormation template which will do all of the heavy lifting.  Here are the steps:
 
@@ -24,7 +18,7 @@ The template creates a VPC with 3 layers.  There are two public, two private, an
 
 It also creates a Cloud9 instance, from which we run the remainder of the lab.
 
-Please allow the stack to complete, then join [lab1](lab1).
+Please allow the stack to complete, then join [lab1](../lab1).
 
 
 ## Participation
