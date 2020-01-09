@@ -51,6 +51,14 @@ Time to initialize our parameters.  We are going to create a MySQL database with
 
 ## 2. Create Parameters
 
+Here is the hierarchy of parameters we will create.
+
+<div align="center">
+
+![Parameter Hierarcy](../img/5.png)
+
+</div>
+
 One would normally type in parameters one at a time, from the GUI, CLI, API, or CloudFormation.  For this lab, there is a helper script to speed things up a bit.
 
 In the command line of Cloud9, run the helper script.
