@@ -3,13 +3,11 @@
 
 ## Workshop progress
 
-**Lab 1: Add your secrets to Parameter Store**
+✅[Lab 1: Add your secrets to Parameter Store](../lab1)
 
-[Lab 2: Create an Aurora Serverless MySQL cluster](../lab2)
+**Lab 2: Create an Aurora Serverless MySQL cluster**
 
 [Lab 3: Access Parameters from your code](../lab3)
-
-
 
 
 ## LAB 1 - Add your secrets to Parameter Store
