@@ -10,37 +10,56 @@
 [Lab 3: Access Parameters from your code](../lab3)
 
 
-## LAB 1 - Add your secrets to Parameter Store
+## Lab 2: Create an Aurora Serverless MySQL cluster
 
-Parameter Store, part of AWS Systems Manager, provides a secure depot for managing credentials and configuration details.  Among the challenges of distributed applications development is how to keep configuration and credentials details consistent across a wide variety of technologies such as Infrastructure as Code (CloudFormation, Teraform), traditional applications on virtual machines, containers, and serverless.
+In this lab, we will modify a CloudFormation template to use the parameters you just edited.
 
-## 1. Getting started with _Event Engine_
+## 1. Setup CloudFormation Template
 
-In this first lab, we will create parameters.
+In this first lab, we will create parameters.  We need to edit the CloudFormation template file, ~/environment/parameter-store/lab2/aurora.yaml.
 
-Start by logging into to [Event Engine](https://dashboard.eventengine.run/login).
-
-Enter your 12-digit hash and Accept.
-
-
-![Login](../img/1.png).
-
-
-Select AWS Console. 
+One way to do this in cloud9, is to navigate to lab2 in Cloud9's left panel, and double click on the file named **aurora.yaml.**
 
 <div align="center">
 
-![AWS Console button](../img/2.png)
+
+
+![Cloud9 Edit Navigation](./img/1.png).
+
 </div>
 
-And again on the Team Dashboard, select Console 
+Edit the template parameter named “ParameterRoot”.  Set the Default value to the root of your parameter store _/mydb_).
+
 <div align="center">
 
-![AWS Console button 2](../img/3.png)
+![Cloud9 Edit](./img/2.png)
 
 </div>
 
-From the AWS console, navigate to Cloud8 and "Open IDE"
+Note that the following two template parameters have been pre-populated to set variables DevPass and DevLogin from the Parameter Store.
+
+Save the CloudFormation template, and create a stack.  The stack will create an Aurora MySQL serverless database, and a lambda function.  We’ll come back to the lambda in the next lab.
+
+## 1. 2.	Create the database, using CloudFormation
+
+We will invoke CloudFormation from the CLI.
+
+Issue the commands to create a CloudFormation stack:
+
+<pre>
+cd ~/environment/parameter-store/lab2
+
+aws cloudformation create-stack --stack-name rds-ps --template-body file://aurora.yaml --capabilities CAPABILITY_NAMED_IAM
+
+</pre>
+
+The CLI returns output similar to:
+```
+{
+    "StackId": "arn:aws:cloudformation:us-east-1:233363133948:stack/rds-ps/e3a1a080-3259-11ea-a41e-0af77bd56d08"
+}
+
+```
 <div align="center">
 
 ![Cloud9 IDE](../img/4.png)
