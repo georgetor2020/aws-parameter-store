@@ -153,11 +153,14 @@ if __name__ == '__main__':
 Let's change the value of the development database password in Parameter Store.  We will use the GUI, but of course you could do this via API or CloudFormation, if desired.
 
 Navigate to the parameter store service.  Parameter store is part of AWS System Manager.  From the console, you can enter "parameter" or "ssm" or "systems manager".
+<p align="center">
 
 ![Systems Manager Parameter Store Console Search](./img/1.png)
 
-![Systems Manager Parameter Store Console ](./img/2.png)
 
+
+![Systems Manager Parameter Store Console ](./img/2.png)
+</p>
 
 For this workshop, we will build an Aurora Serverless Database from Cloudformation.  Cloudformation will obtain the administrative credentials from Parameter store.
 Select the Parameter /mydb/Dev/Password and edit the password.  Save it when you are complete, and don’t forget what you typed.  You will use it later.
