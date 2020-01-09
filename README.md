@@ -60,7 +60,7 @@ Hints are also provided along the way and will look like this:
 
 ### IMPORTANT: Workshop Cleanup
 
-If you're attending an AWS event and are provided an account to use, you can ignore this section because we'll destroy the account once the workshop concludes. Feel free to proceed to [Lab-0 to get started](lab-0-init).
+If you're attending an AWS event and are provided an account to use, you can ignore this section because we'll destroy the account once the workshop concludes. Feel free to proceed to [lab1](lab1).
 
 **If you are using your own account**, it is **VERY** important you clean up resources created during the workshop. Follow these steps once you're done going through the workshop to delete resources that were created:
 
