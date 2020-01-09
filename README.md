@@ -51,7 +51,11 @@ Hints are also provided along the way and will look like this:
 
 If you are curious, there are a few sections of the lab which you by expanding the >details link
 <details><summary>details</summary>
-``` More content is in the details, typically code fragments ```
+
+``` 
+More content is in the details, typically code fragments 
+```
+
 </details> 
 
 ### IMPORTANT: Workshop Cleanup
