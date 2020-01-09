@@ -38,7 +38,7 @@ And again on the Team Dashboard, select Console
 
 From the AWS console, navigate to Cloud8 and "Open IDE"
 
-![Cloud9 IDE](../img/4.jpg)
+![Cloud9 IDE](../img/4.png)
 
 When Cloud9 initializes, it will *automatically* download the github content from https://github.com/dotstar/parameter-store.
 
@@ -62,7 +62,61 @@ In the command line of Cloud9, run the helper script.
   python init-parms.py
 </pre>
 
+<details>
+Here is the code to our helper script.  It parses values from a JSON input file and calls put_parameter() to copy these values to Parameter store.  Note the use of a hierarchy of parameters.  There is on tree for _Pub_ and a seperate one for _Dev_ instances.  In the real world, we would likely have different permissions for each of these paths, so that the whole world wouldn't have access to production credentials.
 
+`
+import boto3
+from pprint import pprint
+import json
+
+
+inputfile = "parameters.json"
+topkey = '/mydb'
+ps = boto3.client('ssm',region_name='us-east-1')
+
+
+if __name__ == '__main__':
+   with open(inputfile,"r") as myfile:
+      data = myfile.read()
+   obj = json.loads(data)
+   # print (obj)
+
+   # Initialize Parameters for Dev
+   try:
+      for env in ['Dev','Prod']:
+         # Put login information into parameter store
+         ps.put_parameter(
+            Name = topkey + '/' + env + '/'+ 'Login',
+            Description = "Login for " + env + "MyDB",
+            Value = obj[env]['Login'],
+            Type = 'String',
+            Overwrite = True
+         )
+         # Put password information into parameter store
+         ps.put_parameter(
+            Name = topkey + '/' + env + '/'+ 'Password',
+            Description="Password for " + env + "MyDB",
+            Value = obj[env]['Password'],
+            Type = 'String',
+            Overwrite=True
+         )
+   except Exception as e:
+      print(e)
+      print('exiting')
+      exit
+
+   print('contents of {} key in parameter store:'.format(topkey))
+   r = ps.get_parameters_by_path(
+      Path=topkey,
+      Recursive=True,
+      MaxResults=10
+   )
+   print('here are your parameters, from the parameter store:')
+   pprint(r['Parameters'],indent=3)
+
+`
+</details>
 
 
 AWS X-Ray is a distributed tracing service that provides a SDK to instrument your applications, a daemon to aggregate and deliver trace data to the X-Ray service, and a dashboard to view a service map which is a visualization of the trace data. If you would like to read more in depth about X-Ray, check out these links to documentation - [What is X-Ray?](https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html) and [X-Ray Concepts](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html)
