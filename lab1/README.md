@@ -14,6 +14,8 @@
 
 Parameter Store, part of AWS Systems Manager, provides a secure depot for managing credentials and configuration details.  Among the challenges of distributed applications development is how to keep configuration and credentials details consistent across a wide variety of technologies such as Infrastructure as Code (CloudFormation, Teraform), traditional applications on virtual machines, containers, and serverless.
 
+## 1. Getting started with _Event Engine_
+
 In this first lab, we will create parameters.
 
 Start by logging into to [Event Engine](https://dashboard.eventengine.run/login).
@@ -47,7 +49,7 @@ When Cloud9 initializes, it will *automatically* download the github content fro
 
 Time to initialize our parameters.  We are going to create a MySQL database with administrative access managed by Parameter Store.
 
-## 1. Create Parameters
+## 2. Create Parameters
 
 One would normally type in parameters one at a time, from the GUI, CLI, API, or CloudFormation.  For this lab, there is a helper script to speed things up a bit.
 
@@ -151,7 +153,7 @@ if __name__ == '__main__':
 ````
 </details>
 
-2. Change a parameter
+## 3. Change a Parameter
 
 Let's change the value of the development database password in Parameter Store.  We will use the GUI, but of course you could do this via API or CloudFormation, if desired.
 
@@ -178,7 +180,7 @@ Hint - the password needs to be one which MySQL accepts.  By the default, the co
 ![Edit Parameter Value ](./img/4.png)
 >/div>
 
-3. Check your work
+## 4. Check your work
 
 Return to the CLI (in Cloud9) , inspect parameter store to validate that the login and password are as you set them.
 
