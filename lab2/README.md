@@ -74,13 +74,13 @@ The CLI returns output similar to:
 ```
 
 
-It takes several minutes to create the database.  Navigate to CloudFormation on the console to monitor progress.
+**It takes several minutes to create the database.  Navigate to CloudFormation on the console to monitor progress.**
 
 ## 3. Enable your Cloud9 instance to network with the database
 
 After CloudFormation instantiates the database, we are ready to use it.
 
-Before we can connect the Cloud9 terminal to the database, we need to give it network access.  Add your cloud9 instance to the security group similar to db-sg-ps-rds-rds-ps.  This security group allows inbound access to port 3306, which is the default MySQL listener.  By adding your cloud9 instance to this SG, you are enabling it to talk to the database.
+Before we can connect the Cloud9 terminal to the database, we need to give it network access.  Add your cloud9 instance to the security group with name similar to _db-sg-ps-rds-rds-ps_.  This security group allows inbound access to port 3306, which is the default MySQL listener.  By adding your cloud9 instance to this SG, you are enabling it to talk to the database.
 
 Navigate to EC2 in the console.
 
@@ -144,7 +144,7 @@ mysql -u $user -h $host
 ```
 </details>
 
-Connect to the database
+Connect to the database.  From the CLI, call the wrapper script, as follows:
 
 <pre>
 cd ~/environment/parameter-store/lab2
@@ -190,6 +190,7 @@ cd ~/environment/parameter-store/lab2
 </pre>
 
 <details>
+
 This should result in the following output:
 ```
 host: devdbcluster-rds-ps.cluster-cqhyviwu3hz1.us-east-1.rds.amazonaws.com
@@ -210,6 +211,7 @@ customer_id     first_name      last_name       street_address  city    state   
 4       Jack    Frank   12 South Main   Springfield     TX      43215
 
 ```
+
 </details>
 
 Now that you’ve created a database and added a small table, time to move to [lab3](../lab3), using parameter store from your applications.
