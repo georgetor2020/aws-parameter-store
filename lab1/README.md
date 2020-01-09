@@ -65,7 +65,7 @@ In the command line of Cloud9, run the helper script.
 <details>
 Here is the code to our helper script.  It parses values from a JSON input file and calls put_parameter() to copy these values to Parameter store.  Note the use of a hierarchy of parameters.  There is on tree for _Pub_ and a seperate one for _Dev_ instances.  In the real world, we would likely have different permissions for each of these paths, so that the whole world wouldn't have access to production credentials.
 
-`
+```
 import boto3
 from pprint import pprint
 import json
@@ -115,7 +115,7 @@ if __name__ == '__main__':
    print('here are your parameters, from the parameter store:')
    pprint(r['Parameters'],indent=3)
 
-`
+````
 </details>
 
 
