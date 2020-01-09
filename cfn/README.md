@@ -18,7 +18,7 @@ The template creates a VPC with 3 layers.  There are two public, two private, an
 
 It also creates a Cloud9 instance, from which we run the remainder of the lab.
 
-Please allow the stack to complete, then join [lab1](../lab1).
+Please allow the stack to complete, then got to step 2 (_Create Parameters_) in [lab1](../lab1).
 
 
 ## Participation
