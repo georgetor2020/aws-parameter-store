@@ -47,7 +47,7 @@ When Cloud9 initializes, it will *automatically* download the github content fro
 
 Time to initialize our parameters.  We are going to create a MySQL database with administrative access managed by Parameter Store.
 
-1. Create Parameters
+## 1. Create Parameters
 
 One would normally type in parameters one at a time, from the GUI, CLI, API, or CloudFormation.  For this lab, there is a helper script to speed things up a bit.
 
