@@ -1,7 +1,7 @@
 #
 # Makefile for DB portion of Parameter Store Lab
 #
-stack=ps-db
+stack=stack02
 template=aurora.yaml
 parameters=aurora_parameters.json
 test:

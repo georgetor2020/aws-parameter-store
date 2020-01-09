@@ -1,7 +1,8 @@
 # Parameter Store workshop
 
 ## Overview
-![mysfits-welcome](/images/mysfits-welcome.png)
+![welcome](/img/1.png)
+
 
 AWS Systems Manager Parameter store and AWS Secrets Manager provide secure, storage for configuration data and secrets management.  You can store values as plaintext (unencrypted data) or ciphertext (encrypted data). You can then reference values by using the unique name that you specified when you created the parameter. Highly scalable, available, and durable, Parameter Store is backed by the AWS Cloud. 
 
@@ -20,7 +21,7 @@ Familiarity with AWS, Python, Cloudformation, and Lambda is a plus but not requi
 
 The labs in the workshop are designed to be completed in sequence, and the full set of instructions are documented in each lab. Read and follow the instructions to complete each of the labs. Don't worry if you get stuck, we provide hints along the way.
 
-* **[Lab 0](lab-0-parameterstore):** Add your Secrets to Parameter Store
+* **[Lab 1](lab-1-parameterstore):** Add your Secrets to Parameter Store
 * **[Lab 1](lab-1-cloudformation):** Deploy Cloudformation template which uses these secrets for an Aurora Serverless MySQL cluster
 * **[Lab 2](lab-2-cli):** Verify that you can access your database from the CLI
 * **[Lab 3](lab-2-lambda):** Verify that you can access your AWS Lambda
