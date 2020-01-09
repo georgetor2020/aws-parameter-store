@@ -12,7 +12,7 @@ In this lab, we will focus on the basics of Parameter Store.
 ### Requirements
 
 * AWS account - if you're doing this workshop as a part of an AWS event, you will be provided an account through a platform called Event Engine. The workshop administrator will provide instructions. If the event specifies you'll need your own account or if you're doing this workshop on your own, it's easy and free to [create an account](https://aws.amazon.com/) if you do not have one already.
-* If using your own AWS account you need to setup a VPC for the rest of the lab.  [lab0] (cfn) has abbreviated instructions on how to run the CloudFormation template to add the VPC.
+* If using your own AWS account you need to setup a VPC for the rest of the lab.  [Lab0](cfn) has abbreviated instructions on how to run the CloudFormation template to add the VPC.
 
 Familiarity with AWS, Python, CloudFormation, EC2, and Lambda is a plus but not required.
 
