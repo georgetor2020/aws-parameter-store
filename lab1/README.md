@@ -168,11 +168,7 @@ Hint - the password needs to be one which MySQL accepts.  By the default, the co
 ![Edit Parameter ](./img/3.png)
 
 
-
 ![Edit Parameter Value ](./img/4.png)
-
-
-![Lab 1 X-Ray](./images/lab-1.png)
 
 
 3. Check your work
