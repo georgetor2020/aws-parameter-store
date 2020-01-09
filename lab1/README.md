@@ -26,20 +26,20 @@ Enter your 12-digit hash and Accept.
 
 Select AWS Console. 
 
-
+<div align="center">
 ![AWS Console button](../img/2.png)
-
+>/div>
 
 And again on the Team Dashboard, select Console 
-
-
+<div align="center">
 ![AWS Console button 2](../img/3.png)
-
+</div>
 
 From the AWS console, navigate to Cloud8 and "Open IDE"
+<div align="center">
 
 ![Cloud9 IDE](../img/4.png)
-
+</div>
 When Cloud9 initializes, it will *automatically* download the github content from https://github.com/dotstar/parameter-store.
 
 Time to initialize our parameters.  We are going to create a MySQL database with administrative access managed by Parameter Store.
@@ -157,7 +157,7 @@ Navigate to the parameter store service.  Parameter store is part of AWS System 
 
 ![Systems Manager Parameter Store Console Search](./img/1.png)
 
-
+ 
 
 ![Systems Manager Parameter Store Console ](./img/2.png)
 </div>
@@ -167,12 +167,13 @@ Select the Parameter /mydb/Dev/Password and edit the password.  Save it when you
 
 Hint - the password needs to be one which MySQL accepts.  By the default, the constraints on the master password are:
 ##At least 8 printable ASCII characters. Can't contain any of the following: / (slash), "(double quote) and @ (at sign)##
+<div align="center">
 
 ![Edit Parameter ](./img/3.png)
 
 
 ![Edit Parameter Value ](./img/4.png)
-
+>/div>
 
 3. Check your work
 
