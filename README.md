@@ -53,7 +53,7 @@ If you are curious, there are a few sections of the lab which you by expanding t
 <details><summary>details</summary>
 
 ``` 
-More content is in the details, typically code fragments 
+	print('More content is in the details, typically things like code fragments which may not be of general interest.')
 ```
 
 </details> 
