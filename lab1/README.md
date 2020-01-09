@@ -98,7 +98,11 @@ here are your parameters, from the parameter store:
 ```
 
 <details>
-Here is the code to our helper script.  It parses values from a JSON input file and calls put_parameter() to copy these values to Parameter store.  Note the use of a hierarchy of parameters.  There is on tree for _Pub_ and a seperate one for _Dev_ instances.  In the real world, we would likely have different permissions for each of these paths, so that the whole world wouldn't have access to production credentials.
+Here our helper script code.  
+
+It parses values from a JSON input file and calls put_parameter() to copy these values to Parameter store.  
+
+Note the use of a hierarchy of parameters.  There is on tree for _Pub_ and a seperate one for _Dev_ instances.  In the real world, we would likely have different permissions for each of these paths, so that the whole world wouldn't have access to production credentials.
 
 ```
 import boto3
