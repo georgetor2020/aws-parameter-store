@@ -182,8 +182,8 @@ Navigate to the parameter store service.  Parameter store is part of AWS System 
 For this workshop, we will build an Aurora Serverless Database from Cloudformation.  Cloudformation will obtain the administrative credentials from Parameter store.
 Select the Parameter /mydb/Dev/Password and edit the password.  Save it when you are complete, and don’t forget what you typed.  You will use it later.
 
-Hint - the password needs to be one which MySQL accepts.  By the default, the constraints on the master password are:
-##At least 8 printable ASCII characters. Can't contain any of the following: / (slash), "(double quote) and @ (at sign)##
+** Be certain that the password complies with MySQL requirements.  By the default, the constraints on the master password are: _At least 8 printable ASCII characters. Can't contain any of the following: / (slash), "(double quote) and @ (at sign)_ **
+
 <div align="center">
 
 ![Edit Parameter ](./img/3.png)
