@@ -72,7 +72,6 @@ The CLI returns output similar to:
 }
 
 ```
-<div align="center">
 
 
 It takes several minutes to create the database.  Navigate to CloudFormation on the console to monitor progress.
@@ -102,9 +101,9 @@ Select your cloud9 instance and Actions -> Networking -> Change Security Groups
 ![Security Group Popup](./img/5.png)
 
 
-</div
+</div>
 
-## 3. Test database connectivity
+## 4. Test database connectivity
 
 After CloudFormation instantiates the database, we are ready to use it.  
 
