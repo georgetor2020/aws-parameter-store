@@ -16,7 +16,16 @@ In this lab, we will modify a CloudFormation template to use the parameters you 
 
 ## 1. Setup CloudFormation Template
 
-In this first lab, we will create parameters.  We need to edit the CloudFormation template file, ~/environment/parameter-store/lab2/aurora.yaml.
+In this first lab, we will create a Serverless MySQL database using our _Dev_ parameters.  We need to edit the CloudFormation template file, ~/environment/parameter-store/lab2/aurora.yaml.
+
+<details>
+We could have used any database, or other AWS service which requires credentials or configuration detail.  
+
+The lab is using a Serverless version of Aurora for it's unique ability to scale to 0.  With Serverless Aurora, after a period of time when there are no connections to the database, it shutsdown.  This is particularly interesting for a development or lab database, as it is very cost effective.  When the database is down, you pay for just the storage used.  It's a simple, cost-effective option for infrequent, intermittent, or unpredictable workloads.
+
+When a connection is received, the database restarts.  The database restart time is elongated, typically between 20 and 40 seconds.  After this one "cold start", connection times are comparable with other MySQL databases.
+</details>
+
 
 One way to do this in cloud9, is to navigate to lab2 in Cloud9's left panel, and double click on the file named **aurora.yaml.**
 
