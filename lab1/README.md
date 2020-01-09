@@ -18,15 +18,18 @@ In this first lab, we will create parameters.
 
 Start by logging into to [Event Engine](https://dashboard.eventengine.run/login).
 
-![Login](./img/1.png).
+
+![Login](./img/0.png).
+
 
 Enter your 12-digit hash and Accept.
 
-Select AWS Console ![AWS Console button](./img/2.png)
+Select AWS Console ![AWS Console button](./img/1.png)
 
 And again on the Team Dashboard, select Console 
 
-![AWS Console button 2](.img/3.png)
+
+![AWS Console button 2](.img/2.png)
 
 
 AWS X-Ray is a distributed tracing service that provides a SDK to instrument your applications, a daemon to aggregate and deliver trace data to the X-Ray service, and a dashboard to view a service map which is a visualization of the trace data. If you would like to read more in depth about X-Ray, check out these links to documentation - [What is X-Ray?](https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html) and [X-Ray Concepts](https://docs.aws.amazon.com/xray/latest/devguide/xray-concepts.html)
