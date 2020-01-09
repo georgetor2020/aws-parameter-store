@@ -11,7 +11,7 @@
 
 ## Lab 3: Access Parameters from your code
 
-Applications must not include credentials in their code.  When one hard-wires credentials, there is a strong risk of compromise.  Default credentials are vulnerable to reverse engineering attacks, attacks based on access to the source code, and are an operational nuisance.
+Applications must not include credentials in their code.  When one hard-wires credentials, there is a strong risk of compromise.  Default credentials are vulnerable to reverse engineering attacks or attacks based on access to the source code.
 
 Password Vaults, such as Parameter Store, provide secure, reliable access to credentials, without the need for vulnerable configuration files or hard-wired credentials.
 
@@ -35,10 +35,12 @@ try:
    # Get the password from parameter store
    param = parameterRoot + "/Password"
    password = ps.get_parameter(Name=param)['Parameter']['Value']
+except:
+  ...
 
 ```
 
-Notice that we are getting some details from the Environment, including where in the parameter store to find our information, and whether this is Prod or Dev.  We then use this information to retrieve the sensitive information from Parameter Store.
+Notice that we are getting some details from the O/S environment, including where in the parameter store to find our information, and whether this is Prod or Dev.  We then use this information to retrieve the sensitive information from Parameter Store.
 
 In this lab, we will set the environment variables, so that lambda can find the parameters.  We will then verify that the Lambda function can access the database with these credentials.
 
@@ -63,7 +65,7 @@ Scroll down, about 2/3 of the way down the page to the Environment variables sec
 
 </div>
 
-**Update the ParamRoot to the base of our parameters ( “/mydb” ).**
+**Update the ParamRoot to the base of our parameters ( /mydb ) and click Save.**
 
 <div align="center">
 
@@ -94,8 +96,8 @@ Calling your lambda function ps-rds-rds-ps
 
 ## Summary
 
-This completes our lab.
-1.	You added parameters to AWS Parameter store
+This completes our lab.  In this lab, you:
+1.	Added parameters to AWS Systems Manager Parameter store
 2.	Used CloudFormation to create a database with these credentials
 3.	Added content to the database, using these credentials
 4.	And finally, accessed the database from a Lambda function
