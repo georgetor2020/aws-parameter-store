@@ -24,7 +24,9 @@ Start by logging into to [Event Engine](https://dashboard.eventengine.run/login)
 
 Enter your 12-digit hash and Accept.
 
-Select AWS Console ![AWS Console button](../img/2.png)
+Select AWS Console 
+
+![AWS Console button](../img/2.png)
 
 And again on the Team Dashboard, select Console 
 
