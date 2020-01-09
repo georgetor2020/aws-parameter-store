@@ -49,7 +49,10 @@ Hints are also provided along the way and will look like this:
 
 #### 3. Details
 
-If you are curious, there are a few sections of the lab which you may expand by hitting the <details><summary>details</summary></details> Link.
+If you are curious, there are a few sections of the lab which you by expanding the >details link
+<details><summary>details</summary>
+``` More content is in the details, typically code fragments ```
+</details> Link.
 
 ### IMPORTANT: Workshop Cleanup
 
