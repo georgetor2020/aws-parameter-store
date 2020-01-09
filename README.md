@@ -12,7 +12,7 @@ In this lab, we will focus on the basics of Parameter Store.
 ### Requirements
 
 * AWS account - if you're doing this workshop as a part of an AWS event, you will be provided an account through a platform called Event Engine. The workshop administrator will provide instructions. If the event specifies you'll need your own account or if you're doing this workshop on your own, it's easy and free to [create an account](https://aws.amazon.com/) if you do not have one already.
-* If using your own AWS account, We haven't finished the setup documentation.
+* If using your own AWS account you need to setup a VPC for the rest of the lab.  [lab0] (cfn) has abbreviated instructions on how to run the CloudFormation template to add the VPC.
 
 Familiarity with AWS, Python, CloudFormation, EC2, and Lambda is a plus but not required.
 
@@ -20,9 +20,9 @@ Familiarity with AWS, Python, CloudFormation, EC2, and Lambda is a plus but not 
 
 The labs in the workshop are designed to be completed in sequence, and the full set of instructions are documented in each lab.  Read and follow the instructions to complete each of the labs.  Don't worry if you get stuck, we provide hints along the way.
 
-* **[Lab 1](lab1):** Add your Secrets to Parameter Store
-* **[Lab 2](lab2):** Create an Aurora Serverless MySQL cluster
-* **[Lab 3](lab3):** Verify that you can access your data with AWS Lambda
+* **[Lab 1](lab1):**	Add your Secrets to Parameter Store
+* **[Lab 2](lab2):**	Create an Aurora Serverless MySQL cluster
+* **[Lab 3](lab3):**	Verify that you can access your data with AWS Lambda
 
 ### Conventions
 
@@ -71,7 +71,9 @@ If you're attending an AWS event and are provided an account to use, you can ign
 
 <details>
 <summary>Troubleshooting: Stack delete failed</summary>
-The Lambda function was created in a private VPC.  To delete this, CloudFormation needs to delete the ENIs associated with the Lambda function. It may take longer than expected to delete this stack, please be patient.
+The Lambda function was created in a private VPC.  To delete this, CloudFormation needs to delete the ENIs associated with the Lambda function. 
+
+It may take longer than expected to delete this stack, please be patient.
 
 </details>
 
