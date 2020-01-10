@@ -222,8 +222,7 @@ Resources:
             Description: MySQL Client Libraries
             LayerName: !Sub 'mysql-lambda-layer-${AWS::StackName}'
             Content:
-                S3Bucket: daveaws
-                # S3Key: layers/mysql-layer.zip
+                S3Bucket: daveaws-www-us-east-1
                 S3Key: layers/mysql-lambda-layer.zip
             
 
