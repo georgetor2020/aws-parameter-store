@@ -5,7 +5,7 @@ Parameters:
   ParameterRoot:
     Description: "Root of the parameter store (e.g. /mydb)"
     Type: String
-    Default: "**CHANGE ME**"
+    Default: CHANGE-ME
   DevPass:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /mydb/Dev/Password
@@ -62,7 +62,7 @@ Resources:
                 - Key: Name
                   Value: !Join [ "-", [ "db-sg", !Ref EnvironmentName, !Ref "AWS::StackName"  ] ]
         
-# Allow inbound MySQL Requests               
+    # Allow inbound MySQL Requests               
     InboundMySQL:
         Type: AWS::EC2::SecurityGroupIngress
         Properties:
@@ -102,7 +102,7 @@ Resources:
                             - ssm:GetParameters
                             - ssm:GetParametersbyPath
                             - ssm:DescribeParameters
-                        Resource: '*'
+                        Resource: 'arn:aws:ssm:us-east-2:123456789012:parameter/mydb/Dev/*'
 
 
     # SQL Function which gets parameters from parameter store and call SELECT from SQL
@@ -116,8 +116,8 @@ Resources:
                     MySQLEndpoint: !GetAtt DevDB.Endpoint.Address
                     MySQLPort: "3306"
                     Environment: "Dev"
-                    # ParamRoot: !Ref ParameterRoot
-                    ParamRoot: "CHANGE-ME"
+                    ParamRoot: !Ref ParameterRoot
+                    # ParamRoot: "CHANGE-ME"
 
             FunctionName: !Join ["-",[!Ref EnvironmentName,!Ref "AWS::StackName"]]
             Handler: index.lambda_handler
