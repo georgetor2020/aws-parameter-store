@@ -44,7 +44,7 @@ Notice that we are getting some details from the O/S environment, including wher
 
 In this lab, we will set the environment variables, so that lambda can find the parameters.  We will then verify that the Lambda function can access the database with these credentials.
 
-Open Lambda in the AWS console.  Click on the hyperlink for our function, ps-rds-rds-ps.
+Open [Lambda](https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions) in the AWS console.  Click on the hyperlink for our function, ps-rds-rds-ps.
 
 <div align="center">
 
@@ -78,6 +78,7 @@ To test that this worked, return to the Cloud9 CLI.
 <pre>
 
 cd ~/environment/parameter-store/lab3
+chmod +x trigger-lambda.bash
 ./trigger-lambda.bash
 
 </pre>
