@@ -74,7 +74,7 @@ The CLI returns output similar to:
 ```
 
 
-**It takes several minutes to create the database.  Navigate to CloudFormation on the console to monitor progress.**
+**It takes several minutes to create the database.  Navigate to [CloudFormation](https://console.aws.amazon.com/cloudformation/home) on the console to monitor progress.**
 
 ## 3. Enable your Cloud9 instance to network with the database
 
