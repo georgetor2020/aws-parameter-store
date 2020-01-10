@@ -22,7 +22,10 @@ Parameters:
     Type: String
     Default: DevDB
 
-
+Conditions:
+    # Flag to control resource creation while debugging
+    CreateResource:
+        !Equals [true,true]
   
 Resources:
           
@@ -76,6 +79,7 @@ Resources:
             
     SQLLambdaRole:
         Type: AWS::IAM::Role
+        Condition: CreateResource
         Properties:
             Description: "Allow SQLLambda function to access VPC and Parameter Store"
             ManagedPolicyArns:
@@ -98,16 +102,25 @@ Resources:
                     Statement:
                       - Effect: Allow
                         Action: 
-                            - ssm:GetParameter
-                            - ssm:GetParameters
                             - ssm:GetParametersbyPath
-                            - ssm:DescribeParameters
-                        Resource: 'arn:aws:ssm:us-east-2:123456789012:parameter/mydb/Dev/*'
+                        Resource: 'arn:aws:ssm:::parameter/mydb/Dev/*'
+                        Condition:
+                            StringLike:
+                                "ssm:resourceTag/Env": Dev                      
+                      - Effect: Allow
+                        Action: 
+                            - ssm:GetParameters, 
+                            - ssm:GetParameter 
+                        Resource: "*"
+                        Condition:
+                            StringLike:
+                                "ssm:resourceTag/Env": Dev
 
 
     # SQL Function which gets parameters from parameter store and call SELECT from SQL
     SQLLambda:
         Type: AWS::Lambda::Function
+        Condition: CreateResource
         Properties:
             Description: "Call DevDB with simple SELECT using Parameter Store"
             Runtime: "python3.6"
@@ -116,8 +129,8 @@ Resources:
                     MySQLEndpoint: !GetAtt DevDB.Endpoint.Address
                     MySQLPort: "3306"
                     Environment: "Dev"
-                    ParamRoot: !Ref ParameterRoot
-                    # ParamRoot: "CHANGE-ME"
+                    # ParamRoot: !Ref ParameterRoot
+                    ParamRoot: "CHANGE-ME"
 
             FunctionName: !Join ["-",[!Ref EnvironmentName,!Ref "AWS::StackName"]]
             Handler: index.lambda_handler
@@ -229,6 +242,7 @@ Outputs:
 
   LambdaName:
     Description: Name of the Lambda Function so that we can find it later from CLI tool
+    Condition: CreateResource
     Value: !Ref SQLLambda
     Export:
         Name: DBLambda

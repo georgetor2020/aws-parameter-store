@@ -20,6 +20,13 @@ update:
 	
 delete:
 	aws cloudformation delete-stack --stack-name ${stack}
+	
+change:
+	aws cloudformation create-change-set --stack-name ${stack} \
+        --change-set-name my-changes \
+	--template-body file://${template} \
+	--parameters file://${parameters} \
+	--capabilities CAPABILITY_NAMED_IAM
 
 outputs:
 	aws cloudformation describe-stacks --stack-name ${stack} --query Stacks[].Outputs[] 

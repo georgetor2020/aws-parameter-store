@@ -55,7 +55,51 @@ Conditions:
   NotEventEngine: !Equals [ !Ref IsEventEngine, false]
 
 Resources:  
-          
+            
+    # Pre-create parameters
+    # Note that the TAGS matter.  They are used in an IAM role to control access to the parameters
+
+    DevLogin:
+        Type: AWS::SSM::Parameter
+        Properties:
+            Description: "Administrative login for Dev DB"
+            Name: /mydb/Dev/Login
+            Tags:
+                "Env": "Dev"
+            Value: Uninitialized
+            Tier: Standard
+            Type: String
+    DevPassword:
+        Type: AWS::SSM::Parameter
+        Properties:
+            Description: "Administrative password for Dev DB"
+            Name: /mydb/Dev/Password
+            Tags:
+                "Env": "Dev"
+            Value: Uninitialized
+            Tier: Standard
+            Type: String      
+    ProdLogin:
+        Type: AWS::SSM::Parameter
+        Properties:
+            Description: "Administrative login for Prod DB"
+            Name: /mydb/Prod/Login
+            Tags:
+                "Env": "Prod"
+            Value: Uninitialized
+            Tier: Standard
+            Type: String
+    ProdPassword:
+        Type: AWS::SSM::Parameter
+        Properties:
+            Description: "Administrative password for Prod DB"
+            Name: /mydb/Prod/Password
+            Tags:
+                "Env": "Prod"
+            Value: Uninitialized
+            Tier: Standard
+            Type: String 
+            
     Cloud9EE:
         Type: AWS::Cloud9::EnvironmentEC2
         Condition: EventEngine
