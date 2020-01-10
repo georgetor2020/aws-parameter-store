@@ -1,7 +1,7 @@
 #
 # Makefile for DB portion of Parameter Store Lab
 #
-stack=stack02
+stack=rds-ps
 template=aurora.yaml
 parameters=aurora_parameters.json
 test:
