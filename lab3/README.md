@@ -19,6 +19,7 @@ Password Vaults, such as Parameter Store, provide secure, reliable access to cre
 
 In this lab, we will look at a Lambda function which uses our credentials to access the data you just added to the database.
 
+<details>
 Here is a snippet of the code, which talks to Parameter Store:
 
 ```
@@ -43,6 +44,8 @@ except:
 Notice that we are getting some details from the O/S environment, including where in the parameter store to find our information, and whether this is Prod or Dev.  We then use this information to retrieve the sensitive information from Parameter Store.
 
 In this lab, we will set the environment variables, so that lambda can find the parameters.  We will then verify that the Lambda function can access the database with these credentials.
+
+</details>
 
 Open [Lambda](https://console.aws.amazon.com/lambda/home?region=us-east-1#/functions) in the AWS console.  Click on the hyperlink for our function, ps-rds-rds-ps.
 

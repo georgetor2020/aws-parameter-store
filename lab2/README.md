@@ -174,7 +174,7 @@ mysql>
 ```
 
 
-**Type exit, or ^D to exit.**
+Congratulations, you just connected to MySQL using parameters.  **To exit, type exit, or ^D to exit.**
 
 Let's add some data to the database.
 

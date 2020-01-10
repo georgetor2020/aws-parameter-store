@@ -171,7 +171,7 @@ if __name__ == '__main__':
 
 Let's change the value of the development database password in Parameter Store.  We will use the GUI, but of course you could do this via API or CloudFormation, if desired.
 
-Navigate to the parameter store service.  Parameter store is part of AWS System Manager.  From the console, you can enter "parameter" or "ssm" or "systems manager".
+Navigate to the [parameter store](https://console.aws.amazon.com/systems-manager/parameters?region=us-east-1) service.  Parameter store is part of AWS System Manager.  From the console, you can enter "parameter" or "ssm" or "systems manager".
 <div align="center">
 
 ![Systems Manager Parameter Store Console Search](./img/1.png)
