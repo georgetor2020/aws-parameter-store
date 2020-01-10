@@ -8,11 +8,11 @@ Parameters:
     Default: CHANGE-ME
   DevPass:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /mydb/Dev/Password
+    Default: /Dev/Password
     NoEcho: True
   DevLogin:
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /mydb/Dev/Login
+    Default: /Dev/Login
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
@@ -35,8 +35,8 @@ Resources:
             Engine: aurora
             EngineMode: serverless
             DatabaseName: !Ref DatabaseName
-            MasterUsername: !Ref DevLogin
-            MasterUserPassword: !Ref DevPass
+            MasterUsername: !Join [ "",[ !Ref "ParameterRoot", !Ref "DevLogin"] ]
+            MasterUserPassword: !Join [ "", [ !Ref "ParameterRoot", !Ref "DevPass"] ]
             DBClusterIdentifier: !Join [ "-", ["DevDBCluster",!Ref "AWS::StackName"]]
             DBSubnetGroupName: !ImportValue DBSubnetGroup
             BackupRetentionPeriod: 1
@@ -76,7 +76,7 @@ Resources:
             GroupId: !Ref DBSecurityGroup             
       
            
-            
+    # Note - role for Lambda access to Parameter Stores assumes they have a tag Env=Dev        
     SQLLambdaRole:
         Type: AWS::IAM::Role
         Condition: CreateResource
