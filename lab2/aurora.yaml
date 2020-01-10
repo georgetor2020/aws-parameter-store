@@ -116,7 +116,9 @@ Resources:
                     MySQLEndpoint: !GetAtt DevDB.Endpoint.Address
                     MySQLPort: "3306"
                     Environment: "Dev"
-                    ParamRoot: !Ref ParameterRoot
+                    # ParamRoot: !Ref ParameterRoot
+                    ParamRoot: "CHANGE-ME"
+
             FunctionName: !Join ["-",[!Ref EnvironmentName,!Ref "AWS::StackName"]]
             Handler: index.lambda_handler
             Layers: 
@@ -184,14 +186,6 @@ Resources:
                        exit(2)
                     
                     
-                    def lambda_handler2(event, context):
-                       print("Hello from Lambda!")
-                       return {
-                          'statusCode': 200,
-                          'body': json.dumps('Hello from Lambda!')
-                       }
-                    
-                    
                     def lambda_handler(event, context):
                        result = {"Error": "SQL Failed"}
                        SQL = "SELECT * FROM customer LIMIT 10"
@@ -203,9 +197,9 @@ Resources:
                           myresult = {}
                           myresult["body"] = mycursor.fetchall()
                           myresult["StatusCode"] = 202
+                          myresult["content-type"] = "application/json"
                           result = json.dumps(myresult)
                           result = myresult
-                          # result = myresult
                        except Exception as e:
                           print("error executing SQL: ", SQL, " : ", e)
                        return (result)

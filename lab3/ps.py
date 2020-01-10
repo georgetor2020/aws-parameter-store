@@ -50,16 +50,7 @@ except Exception as e:
    exit(2)
 
 
-def lambda_handler2(event, context):
-   print("Hello from Lambda!")
-   return {
-      'statusCode': 200,
-      'body': json.dumps('Hello from Lambda!')
-   }
-
-
 def lambda_handler(event, context):
-   # print("event: ",event,"\n","-"*20)
    result = {"Error": "SQL Failed"}
    SQL = "SELECT * FROM customer LIMIT 10"
    try:
@@ -70,13 +61,9 @@ def lambda_handler(event, context):
       myresult = {}
       myresult["body"] = mycursor.fetchall()
       myresult["StatusCode"] = 202
+      myresult["content-type"] = "application/json"
       result = json.dumps(myresult)
       result = myresult
-      # result = myresult
    except Exception as e:
       print("error executing SQL: ", SQL, " : ", e)
    return (result)
-
-# if __name__ == '__main__':
-#    r = lambda_handler(event="",context="")
-#    print(r)
