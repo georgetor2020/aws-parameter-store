@@ -12,7 +12,6 @@ if __name__ == '__main__':
    with open(inputfile,"r") as myfile:
       data = myfile.read()
    obj = json.loads(data)
-   # print (obj)
 
    # Initialize Parameters for Dev
    try:

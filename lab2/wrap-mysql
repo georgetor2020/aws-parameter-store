@@ -8,8 +8,8 @@ echo host: $host
 user=$(aws ssm get-parameter --name /mydb/Dev/Login --query Parameter.Value  --output text)
 password=$(aws ssm get-parameter --name /mydb/Dev/Password --query Parameter.Value  --output text)
 
-echo user: $user
-echo password: $password
+# echo user: $user
+# echo password: $password
 
 # set the password as MySQL default password
 # by creating a new $HOME/.my.cnf
