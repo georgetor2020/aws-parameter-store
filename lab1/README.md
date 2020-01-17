@@ -42,7 +42,7 @@ And again on the Team Dashboard, select Console
 
 </div>
 
-From the AWS console, navigate to Cloud9 and "Open IDE"
+From the AWS console, navigate to [Cloud9](https://console.aws.amazon.com/cloud9/home?region=us-east-1) and "Open IDE"
 <div align="center">
 
 ![Cloud9 IDE](../img/4.png)

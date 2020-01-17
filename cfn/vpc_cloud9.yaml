@@ -99,7 +99,14 @@ Resources:
             Value: Uninitialized
             Tier: Standard
             Type: String 
-            
+    Bucket01:
+        Type: AWS::S3::Bucket
+        Properties:
+            BucketEncryption:
+                ServerSideEncryptionConfiguration:
+                    - ServerSideEncryptionByDefault:
+                        SSEAlgorithm: AES256
+                        
     Cloud9EE:
         Type: AWS::Cloud9::EnvironmentEC2
         Condition: EventEngine
@@ -349,3 +356,9 @@ Outputs:
     Value: !Ref VPC
     Export:
         Name: VPCId
+  BucketName:
+    Description: Bucket used in S3 lab
+    Value: !Ref Bucket01
+    Export:
+        Name: LabBucketName
+  
