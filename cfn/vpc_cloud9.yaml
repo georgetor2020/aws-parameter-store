@@ -17,7 +17,7 @@ Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
-    Default: plab
+    Default: SecurityWorkshop
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
@@ -308,7 +308,7 @@ Resources:
             EnableDnsHostnames: true
             Tags:
                 - Key: Name
-                  Value: !Ref EnvironmentName
+                  Value: !Join [ '',  [!Ref EnvironmentName, "VPC" ]]
 
     InternetGateway:
         Type: AWS::EC2::InternetGateway
