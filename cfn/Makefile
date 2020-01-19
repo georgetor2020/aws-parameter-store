@@ -2,7 +2,7 @@ stack=ps-vpc
 template=vpc_cloud9.yaml
 parameters=vpc_cloud9_parameters.json
 test:
-	cfn-lint ${template} --ignore-checks W3010,W1001
+	cfn-lint ${template} --ignore-checks W3010,W1001,W8001
 
 create:
 	aws cloudformation create-stack \

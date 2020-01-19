@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Creates a VPC and Cloud9 instance, including VPCs for a future Aurora database.
+
 Parameters:
   DBCIDR1:
     Type: String
@@ -42,17 +43,37 @@ Parameters:
     Type: String
     Default: 10.2.12.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
   IsEventEngine:
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
-
-  
+      
+  # Used for debugging the CF template.
+  # Add conditions to resource you don't want to build
+  SkipThisParameter:
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MakeS3BucketParameter:
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+      
 Conditions:
   EventEngine: !Equals [ !Ref IsEventEngine, true]
   NotEventEngine: !Equals [ !Ref IsEventEngine, false]
+  SkipThis: !Equals [ !Ref SkipThisParameter, false]
+  MakeS3Bucket: !Equals [ !Ref MakeS3BucketParameter, true ]
+
 
 Resources:  
             
@@ -101,12 +122,111 @@ Resources:
             Type: String 
     Bucket01:
         Type: AWS::S3::Bucket
+        Condition: MakeS3Bucket
+        DeletionPolicy: Retain
+        UpdateReplacePolicy: Retain
         Properties:
+            # BucketName: daveaws-foo
             BucketEncryption:
                 ServerSideEncryptionConfiguration:
                     - ServerSideEncryptionByDefault:
                         SSEAlgorithm: AES256
                         
+    # This instance run's it's user-data script then terminates.
+    # It is used to put some data in the S3 buckets.
+    EC2Admin: 
+        Type: "AWS::EC2::Instance"
+        DependsOn: Bucket01
+        Condition: MakeS3Bucket
+        Properties: 
+            ImageId: !Ref LatestAmiId
+            InstanceType: "t3.medium"
+            SubnetId: 
+                Ref: PublicSubnet1
+            Tags: 
+                - Key: Name
+                  Value: Admin
+            SecurityGroupIds: 
+                - Ref: NoGoInstanceSecurityGroup
+            IamInstanceProfile: 
+                Ref: AdminInstanceProfile
+            # BlockDeviceMappings: 
+                # - DeviceName: "/dev/xvda"
+                  # Ebs: 
+                  # VolumeType: gp2
+                  # DeleteOnTermination: true
+                  # VolumeSize: 10
+            UserData: 
+                'Fn::Base64': 
+                  !Sub |
+                    #!/bin/bash -xe
+                    BUCKET01=${Bucket01}
+                    echo 'AdminInstance' | sudo tee -a  /proc/sys/kernel/hostname
+                    dd if=/dev/zero of=/tmp/output  bs=1M  count=1
+                    aws s3api put-object --bucket $BUCKET01 --key app1/file1 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app1/file2 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app1/file3 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app1/file4 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app1/file5 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app2/file1 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app2/file2 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app2/file3 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app2/file4 --body /tmp/output
+                    aws s3api put-object --bucket $BUCKET01 --key app2/file5 --body /tmp/output
+                    sleep 2
+                    # Now stop this instance
+                    AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+                    # delete last digit to turn AZ into REGION
+                    REGION=$(echo $AZ | sed s/.$//)
+                    iid=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+                    aws ec2 terminate-instances --instance-ids $iid --region $REGION
+
+    AdminRole: 
+        Type: "AWS::IAM::Role"
+        Condition: MakeS3Bucket
+        Properties: 
+            Description: Used just long enough to put some data in S3 then delete's self via user-data
+            # Enable Session Manager for debugging
+            ManagedPolicyArns:
+                - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+            AssumeRolePolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                    - Effect: Allow
+                      Principal: 
+                        Service: 
+                            - "ec2.amazonaws.com"
+                      Action: 
+                        - "sts:AssumeRole"
+            Path: "/"
+            Policies: 
+            - PolicyName: admin
+              PolicyDocument: 
+                Version: "2012-10-17"
+                Statement: 
+                - Effect: Allow
+                  Action: 
+                  - "ec2:TerminateInstances"
+                  - "s3:*"
+                  Resource: "*"
+        
+ 
+    AdminInstanceProfile: 
+        Condition: MakeS3Bucket
+        Type: "AWS::IAM::InstanceProfile"
+        Properties: 
+            Path: "/"
+            Roles: 
+                - !Ref AdminRole
+        
+    NoGoInstanceSecurityGroup:
+        Condition: MakeS3Bucket
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: No Inbound ingress rules
+            VpcId:
+                Ref: VPC
+        
     Cloud9EE:
         Type: AWS::Cloud9::EnvironmentEC2
         Condition: EventEngine
@@ -358,6 +478,7 @@ Outputs:
         Name: VPCId
   BucketName:
     Description: Bucket used in S3 lab
+    Condition: MakeS3Bucket
     Value: !Ref Bucket01
     Export:
         Name: LabBucketName
