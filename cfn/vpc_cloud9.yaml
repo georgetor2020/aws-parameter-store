@@ -61,6 +61,9 @@ Parameters:
     AllowedValues:
       - true
       - false
+  
+  # For one immersion day, I am running both parameter store and S3 labs
+  # This switch toggles making the S3 resources for the 2nd lab
   MakeS3BucketParameter:
     Type: String
     Default: true
@@ -120,27 +123,29 @@ Resources:
             Value: Uninitialized
             Tier: Standard
             Type: String 
+    
     Bucket01:
         Type: AWS::S3::Bucket
         Condition: MakeS3Bucket
         DeletionPolicy: Retain
         UpdateReplacePolicy: Retain
-        Properties:
+        # Properties:
             # BucketName: daveaws-foo
-            BucketEncryption:
-                ServerSideEncryptionConfiguration:
-                    - ServerSideEncryptionByDefault:
-                        SSEAlgorithm: AES256
+            # BucketEncryption:
+            #     ServerSideEncryptionConfiguration:
+            #         - ServerSideEncryptionByDefault:
+            #             SSEAlgorithm: AES256
                         
     # This instance run's it's user-data script then terminates.
     # It is used to put some data in the S3 buckets.
+    # This functionality should probably be a custom resource.
     EC2Admin: 
         Type: "AWS::EC2::Instance"
         DependsOn: Bucket01
         Condition: MakeS3Bucket
         Properties: 
             ImageId: !Ref LatestAmiId
-            InstanceType: "t3.medium"
+            InstanceType: "t2.micro"
             SubnetId: 
                 Ref: PublicSubnet1
             Tags: 
@@ -238,6 +243,8 @@ Resources:
             Repositories:
                 - RepositoryUrl: https://github.com/dotstar/parameter-store
                   PathComponent: /parameter-store
+                - RepositoryUrl: https://github.com/dotstar/amazon-s3-security-settings-and-controls
+                  PathComponent: /amazon-s3-security-settings-and-controls
             OwnerArn: !Sub  "arn:aws:sts::${AWS::AccountId}:assumed-role/TeamRole/MasterKey"
             SubnetId: !Ref PublicSubnet1
             
@@ -252,6 +259,8 @@ Resources:
             Repositories:
                 - RepositoryUrl: https://github.com/dotstar/parameter-store
                   PathComponent: /parameter-store
+                - RepositoryUrl: https://github.com/dotstar/amazon-s3-security-settings-and-controls
+                  PathComponent: /amazon-s3-security-settings-and-controls
             SubnetId: !Ref PublicSubnet1
       
     DBSubnetGroup:
