@@ -70,15 +70,9 @@ Scroll down, about 2/3 of the way down the page to the Environment variables sec
 
 **Update the ParamRoot to the base of our parameters ( /mydb ).**
 
-<div align="center">
-
-![Lambda Save](./img/3.png)
-
-</div>
-
 3. Change the Timeout in "Basic Settings" to 2 minutes
    
-   A little further down the configuration page for Lambda is a section labeled "Basic settings".  Change the Lambda Timeout to 2 minutes and click Save.
+   A little further down the configuration page for Lambda is a section labeled "Basic settings".  Change the Lambda Timeout to 2 minutes and click Save [ near the top of the screen ].
 
 </div>
 
