@@ -78,7 +78,7 @@ The CLI returns output similar to:
 
 ## 3. Enable your Cloud9 instance to network with the database
 
-After CloudFormation instantiates the database, we are ready to use it.
+After CloudFormation instantiates the database, we are ready to use it.  **Do not proceed with this section until the CloudFormation stack builds completely.**
 
 Before we can connect the Cloud9 terminal to the database, we need to give it network access.  Add your cloud9 instance to the security group with name similar to _db-sg-ps-rds-rds-ps_.  This security group allows inbound access to port 3306, which is the default MySQL listener.  By adding your cloud9 instance to this SG, you are enabling it to talk to the database.
 

@@ -56,7 +56,7 @@ Open [Lambda](https://console.aws.amazon.com/lambda/home?region=us-east-1#/funct
 </div>
 
 
-Edit the template parameter named “ParameterRoot”.  **Set the default value to the root of your parameter store _/mydb_**.
+2. Edit the template parameter named “ParameterRoot”.  **Set the default value to the root of your parameter store _/mydb_**.
 
 
 
@@ -68,13 +68,28 @@ Scroll down, about 2/3 of the way down the page to the Environment variables sec
 
 </div>
 
-**Update the ParamRoot to the base of our parameters ( /mydb ) and click Save.**
+**Update the ParamRoot to the base of our parameters ( /mydb ).**
 
 <div align="center">
 
 ![Lambda Save](./img/3.png)
 
 </div>
+
+3. Change the Timeout in "Basic Settings" to 2 minutes
+   
+   A little further down the configuration page for Lambda is a section labeled "Basic settings".  Change the Lambda Timeout to 2 minutes and click Save.
+
+</div>
+
+
+<div align="center">
+
+![Lambda Save](./img/4.png)
+
+![Save Button](./img/5.png)
+
+</div>   
 
 To test that this worked, return to the Cloud9 CLI.
 
