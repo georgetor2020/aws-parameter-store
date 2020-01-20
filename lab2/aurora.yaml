@@ -136,9 +136,9 @@ Resources:
             Handler: index.lambda_handler
             Layers: 
                 - !Ref MySQLLambdaLayer
-            MemorySize: 128
+            MemorySize: 256
             Role: !GetAtt SQLLambdaRole.Arn
-            Timeout: 45
+            Timeout: 300
             VpcConfig:
                 SubnetIds: 
                     - !ImportValue PrivateSubnet1Id
