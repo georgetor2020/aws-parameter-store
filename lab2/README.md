@@ -50,7 +50,7 @@ Edit the template parameter named “ParameterRoot”.  **Set the default value 
 
 Note that the following two template parameters have been pre-populated to set variables DevPass and DevLogin from the Parameter Store.
 
-Save the CloudFormation template, and create a stack.  The stack will create an Aurora MySQL serverless database, and a lambda function.  We’ll come back to the lambda in the next lab.
+**Save the CloudFormation template**, and create a stack.  The stack will create an Aurora MySQL serverless database, and a lambda function.  We’ll come back to the lambda in the next lab.
 
 ## 2. Create the database, using CloudFormation
 
@@ -82,7 +82,7 @@ After CloudFormation instantiates the database, we are ready to use it.  **Do no
 
 Before we can connect the Cloud9 terminal to the database, we need to give it network access.  Add your cloud9 instance to the security group with name similar to _db-sg-ps-rds-rds-ps_.  This security group allows inbound access to port 3306, which is the default MySQL listener.  By adding your cloud9 instance to this SG, you are enabling it to talk to the database.
 
-Navigate to [EC2](https://console.aws.amazon.com/console/home) in the console.
+Navigate to [EC2](https://console.aws.amazon.com/ec2) in the console.
 
 <div align="center">
 

@@ -11,8 +11,8 @@ Parameters:
     Default: "10.2.203.0/24"
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   DBCIDR3:
-    Type: String
     Default: "10.2.204.0/24"
+    Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
@@ -127,14 +127,14 @@ Resources:
     Bucket01:
         Type: AWS::S3::Bucket
         Condition: MakeS3Bucket
+        # Properties:
+          # BucketName: !Join [ '-', ['S3 Lab', !Ref EnvironmentName, !Ref "AWS::AccountId",!Ref "AWS::StackName"]]
+          # BucketEncryption:
+          #     ServerSideEncryptionConfiguration:
+          #         - ServerSideEncryptionByDefault:
+          #             SSEAlgorithm: AES256
         DeletionPolicy: Retain
         UpdateReplacePolicy: Retain
-        # Properties:
-            # BucketName: daveaws-foo
-            # BucketEncryption:
-            #     ServerSideEncryptionConfiguration:
-            #         - ServerSideEncryptionByDefault:
-            #             SSEAlgorithm: AES256
                         
     # This instance run's it's user-data script then terminates.
     # It is used to put some data in the S3 buckets.
@@ -155,12 +155,6 @@ Resources:
                 - Ref: NoGoInstanceSecurityGroup
             IamInstanceProfile: 
                 Ref: AdminInstanceProfile
-            # BlockDeviceMappings: 
-                # - DeviceName: "/dev/xvda"
-                  # Ebs: 
-                  # VolumeType: gp2
-                  # DeleteOnTermination: true
-                  # VolumeSize: 10
             UserData: 
                 'Fn::Base64': 
                   !Sub |
@@ -213,8 +207,7 @@ Resources:
                   Action: 
                   - "ec2:TerminateInstances"
                   - "s3:*"
-                  Resource: "*"
-        
+                  Resource: "*"     
  
     AdminInstanceProfile: 
         Condition: MakeS3Bucket
@@ -276,7 +269,7 @@ Resources:
     DBSubnet01:
         Type: AWS::EC2::Subnet
         Properties:
-            AvailabilityZone: "us-east-1a"
+            AvailabilityZone: !Select [ 0, !GetAZs '' ]
             CidrBlock: !Ref DBCIDR1
             VpcId: !Ref VPC
             Tags:
@@ -285,7 +278,7 @@ Resources:
     DBSubnet02:
         Type: AWS::EC2::Subnet
         Properties:
-            AvailabilityZone: "us-east-1b"
+            AvailabilityZone: !Select [ 1, !GetAZs '' ]
             CidrBlock: !Ref DBCIDR2
             VpcId: !Ref VPC
             Tags:
@@ -294,7 +287,7 @@ Resources:
     DBSubnet03:
         Type: AWS::EC2::Subnet
         Properties:
-            AvailabilityZone: "us-east-1c"
+            AvailabilityZone: !Select [ 2, !GetAZs '' ]
             CidrBlock: !Ref DBCIDR3
             VpcId: !Ref VPC
             Tags:

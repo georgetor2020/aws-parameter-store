@@ -115,6 +115,8 @@ This completes our lab.  In this lab, you:
 3.	Added content to the database, using these credentials
 4.	And finally, accessed the database from a Lambda function
 
+You did this all, with no _secrets_ coded into the CloudFormation template, CLI command, or Lambda function.
+
 Credential and configuration vaults, like AWS Parameter Store, AWS Secrets Manager, and Hashicorp Vault are an important tool to keeping our applications secure and manageable.  Avoid hard-coding secrets into a file or shell script, there is too much danger of them leaking, and enabling unauthorized access, loss of intellectual property, or worse.
 
 
